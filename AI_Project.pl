@@ -1,5 +1,6 @@
-faster(cat,dog).
-faster(light,sound).
-faster(cheetah,tiger).
+:- dynamic underlying_condition/1.
+:- dynamic ethnicity/1.
+:- dynamic patient/9.
 
-slower(Y,X):- faster(X,Y).
+
+

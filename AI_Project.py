@@ -1,4 +1,10 @@
 from tkinter import *
+from pyswip import Prolog
+
+# Prolog
+prolog = Prolog()
+
+prolog.consult("AI_Project.pl")
 
 
 # Commands
@@ -52,10 +58,26 @@ def ethnicity():
 
 def sendCToDatabase():
     cond = conditiontb.get()
+    if cond[0].isupper():
+        prolog.assertz("underlying_condition('" + cond + "')")
+    else:
+        prolog.assertz("underlying_condition("+cond+")")
+
+    c = list(prolog.query("underlying_condition(X)"))
+
+    print(c)
 
 
 def sendEToDatabase():
     eth = ethnicitytb.get()
+    if eth[0].isupper():
+        prolog.assertz("ethnicity('" + eth + "')")
+    else:
+        prolog.assertz("ethnicity(" + eth + ")")
+
+    c = list(prolog.query("ethnicity(X)"))
+
+    print(c)
 
 
 def add_reg():
@@ -98,10 +120,11 @@ def add_reg():
     weight.grid(row=8, column=1, columnspan=2)
 
     # Dropdown Menu
-    # selected = StringVar()
-    # selected.set(ETHNICITY[0])
-    # ethnicities = OptionMenu(reg_frame, selected, *ETHNICITY)
-    # ethnicities.grid(row=5, column=1, columnspan=2)
+    selected = StringVar()
+    ETHNICITY = [e['X'] for e in list(prolog.query("ethnicity(X)"))]
+    selected.set(ETHNICITY[0])
+    ethnicities = OptionMenu(reg_frame, selected, *ETHNICITY)
+    ethnicities.grid(row=5, column=1, columnspan=2)
 
     # Radio Button
     gender = StringVar()
@@ -185,10 +208,11 @@ def add_delta():
     weight.grid(row=8, column=1, columnspan=2)
 
     # Dropdown Menu
-    # selected = StringVar()
-    # selected.set(ETHNICITY[0])
-    # ethnicities = OptionMenu(delta_frame, selected, *ETHNICITY)
-    # ethnicities.grid(row=5, column=1, columnspan=2)
+    selected = StringVar()
+    ETHNICITY = [e['X'] for e in list(prolog.query("ethnicity(X)"))]
+    selected.set(ETHNICITY[0])
+    ethnicities = OptionMenu(delta_frame, selected, *ETHNICITY)
+    ethnicities.grid(row=5, column=1, columnspan=2)
 
     # Radio Button
     gender = StringVar()
@@ -249,15 +273,17 @@ def add_omicron():
     weight.grid(row=9, column=1, columnspan=2)
 
     # Dropdown List
-    # clicked = StringVar()
-    # clicked.set(CONDITIONS[0])
-    # underlying = OptionMenu(omicron_frame, clicked, *CONDITIONS)
-    # underlying.grid(row=5, column=1, columnspan=2)
-    #
-    # selected = StringVar()
-    # selected.set(ETHNICITY[0])
-    # ethnicities = OptionMenu(omicron_frame, selected, *ETHNICITY)
-    # ethnicities.grid(row=6, column=1, columnspan=2)
+    clicked = StringVar()
+    CONDITIONS = [c['X'] for c in list(prolog.query("underlying_condition(X)"))]
+    clicked.set(CONDITIONS[0])
+    underlying = OptionMenu(omicron_frame, clicked, *CONDITIONS)
+    underlying.grid(row=5, column=1, columnspan=2)
+
+    selected = StringVar()
+    ETHNICITY = [e['X'] for e in list(prolog.query("ethnicity(X)"))]
+    selected.set(ETHNICITY[0])
+    ethnicities = OptionMenu(omicron_frame, selected, *ETHNICITY)
+    ethnicities.grid(row=6, column=1, columnspan=2)
 
     # Radio Button
     gender = StringVar()
@@ -292,7 +318,8 @@ info_frame = LabelFrame(main_window, text=" ", padx=40, pady=40, borderwidth=10,
 info_frame.grid(row=0, column=1, padx=(20, 80), pady=100)
 
 # Buttons
-Button(main_frame, text="Add Condition Fact", command=add_condition).grid(row=0, column=0, pady=10, padx=100, ipadx=26)
+Button(main_frame, text="Add Condition/Ethnicity Fact", command=add_condition).grid(row=0, column=0, pady=10, padx=100,
+                                                                                    ipadx=26)
 Button(main_frame, text="Add Delta Variant Fact", command=add_delta).grid(row=1, column=0, pady=10, padx=100, ipadx=20)
 Button(main_frame, text="Add Regular COVID Virus Fact", command=add_reg).grid(row=2, column=0, pady=10, padx=100)
 Button(main_frame, text="Add Omicron Variant Fact", command=add_omicron).grid(row=3, column=0, pady=10, padx=100,
