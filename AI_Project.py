@@ -113,10 +113,20 @@ def add_patient():
             # print(c)
 
         symptoms = []
+        mild = 0
+        severe = 0
+        owupoint = 0
+        dpoint = 0
+        opoint = 0;
         ppoints = 0
         for sym in range(len(SYMPTOMS)):
             if svariables[sym].get() == "On":
+                symptoms.append(SYMPTOMS[sym])
                 ppoints += int(POINTS[sym])
+                if int(POINTS[sym]) == 1 or int(POINTS[sym]) == 2:
+                    mild += 1
+                else:
+                    severe += 1
         prolog.assertz("patientstats('"+ pname + "'," + str(ppoints) + ")")
         # c = list(prolog.query("patientstats('" + pname + "',B)"))
         # print(c)

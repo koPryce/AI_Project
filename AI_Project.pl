@@ -5,6 +5,7 @@
 :- dynamic patientw/11.
 :- dynamic punderlying/2.
 :- dynamic patientstats/2.
+:- dynamic virusstats/5.
 
 
 %Rules
@@ -13,6 +14,8 @@ get_patientw(A,B,C,D,E,F,G,H,I,J,K):- patientw(A,B,C,D,E,F,G,H,I,J,K).
 get_punderlying(A,B):- punderlying(A,B).
 
 %Facts
+virusstats(0,0,0,0,0).
+
 underlying_condition('(empty)').
 underlying_condition(diabetes).
 underlying_condition(h).
