@@ -1,15 +1,16 @@
 from tkinter import *
 from pyswip import Prolog
 
-# Prolog
+# Used to connect to the Prolog Knowledge Base
 prolog = Prolog()
-
 prolog.consult("AI_Project.pl")
 
 
 # Commands
+# This command adds facts entered by the user into the knowledge base
 def add_fact():
     # Inner Commands
+    # This function brings up the widgets necessary to enter a risky ethnicity
     def ethnicity():
         conditionbtn.destroy()
         ethnicitybtn.destroy()
@@ -17,23 +18,18 @@ def add_fact():
         ethnicitytb.grid(row=0, column=1)
         esubmitbtn = Button(condition_window, text="Submit", command=sendEToDatabase)
         esubmitbtn.grid(row=1, column=0)
-        backbtn = Button(condition_window, text="Go Back", command=readd_fact)
+        backbtn = Button(condition_window, text="Go Back", command=read_fact)
         backbtn.grid(row=1, column=1)
 
     def sendCToDatabase():
-        cond = conditiontb.get()
-        if cond[0].isupper():
-            prolog.assertz("underlying_condition('" + cond + "')")
-        else:
-            prolog.assertz("underlying_condition(" + cond + ")")
+        cond = conditiontb.get().capitalize()
+        prolog.assertz("underlying_condition('" + cond + "')")  # Adds the underlying condition entered into the knowledge base
 
     def sendEToDatabase():
-        eth = ethnicitytb.get()
-        if eth[0].isupper():
-            prolog.assertz("ethnicity('" + eth + "')")
-        else:
-            prolog.assertz("ethnicity(" + eth + ")")
+        eth = ethnicitytb.get().capitalize()
+        prolog.assertz("ethnicity('" + eth + "')")  # Adds the ethnicity entered into the knowledge base
 
+    # This function brings up the widgets necessary to enter an underlying condition
     def condition():
         conditionbtn.destroy()
         ethnicitybtn.destroy()
@@ -41,10 +37,11 @@ def add_fact():
         conditiontb.grid(row=0, column=1)
         csubmitbtn = Button(condition_window, text="Submit", command=sendCToDatabase)
         csubmitbtn.grid(row=1, column=0)
-        backbtn = Button(condition_window, text="Go Back", command=readd_fact)
+        backbtn = Button(condition_window, text="Go Back", command=read_fact)
         backbtn.grid(row=1, column=1)
 
-    def readd_fact():
+    # Allows the user to go back to choose whether to enter an at risk ethnicity or an underlying condition
+    def read_fact():
         condition_window.destroy()
         add_fact()
 
@@ -70,11 +67,13 @@ def add_fact():
     ethnicitybtn.grid(row=1, column=0)
 
 
+# This function takes the information entered by the user about the patient and stores it into the knowledge base
 def add_patient():
     global gender
     global ans
 
     # Inner Commands
+    #Adds the information to Prolog
     def add_patient_to_prolog():
         pname = name.get().capitalize()
         page = age.get()
@@ -88,7 +87,7 @@ def add_patient():
 
         if pdfb == "yes":
             psys = systolic.get()
-            pdia = diastolic.get()
+            pdia = diastolic.get() # The systolic and diastolic values are retrieved if they experience dizziness, fainting or blurry vision
             prolog.assertz("patientw('" + pname + "', " + page + "," + pheight1 + "," + pheight2 + "," + ptemp + ",'"
                            + pethnicity + "'," + pgender + "," + pweight + "," + pdfb + "," + psys + "," + pdia + ")")
             # c = list(prolog.query("get_patientw('" + pname + "',B,C,D,E,F,G,H,I,J,K)"))
@@ -101,36 +100,41 @@ def add_patient():
             #
             # print(c)
 
+        # The underlying conditions selected by the user is added to prolog along with the name of the patient who
+        # experienced them
         conditions = []
         length = len(CONDITIONS)
         for con in range(length):
             if variables[con].get() == "On":
-                conditions.append(str(CONDITIONS[con]).capitalize())
+                conditions.append(str(CONDITIONS[con]).capitalize()) # This list stores the underlying conditions the patient experienced
 
         for f in conditions:
             prolog.assertz("punderlying('" + pname + "','" + f + "')")
             # c = list(prolog.query("get_punderlying('" + pname + "',B)"))
             # print(c)
 
+        # The symptoms selected by the user is added to prolog along with the name of the patient who experienced them
         symptoms = []
         mild = 0
         severe = 0
         owupoint = 0
         dpoint = 0
-        opoint = 0;
+        opoint = 0
         ppoints = 0
         for sym in range(len(SYMPTOMS)):
             if svariables[sym].get() == "On":
-                symptoms.append(SYMPTOMS[sym])
+                symptoms.append(SYMPTOMS[sym]) # This list stores the symptoms the patient experiences
                 ppoints += int(POINTS[sym])
                 if int(POINTS[sym]) == 1 or int(POINTS[sym]) == 2:
                     mild += 1
                 else:
                     severe += 1
-        prolog.assertz("patientstats('"+ pname + "'," + str(ppoints) + ")")
+        prolog.assertz("patientstats('" + pname + "'," + str(ppoints) + ")")
         # c = list(prolog.query("patientstats('" + pname + "',B)"))
         # print(c)
 
+    # If the patient experienced dizziness, fainting or blurry vision, this function adds the option to enter the
+    # systolic and diastolic pressures of the patient to the frame. If not, it removes the option.
     def display_pressure(frame, val):
         global systolic
         global diastolic
@@ -196,18 +200,19 @@ def add_patient():
 
     # Dropdown Menu
     selected = StringVar()
-    ETHNICITY = [e['X'] for e in list(prolog.query("ethnicity(X)"))]
+    ETHNICITY = [e['X'] for e in list(prolog.query("ethnicity(X)"))] # This list stores all the risky ethnicities stored in the knowledge base
     selected.set(ETHNICITY[0])
     ethnicities = OptionMenu(patient_frame, selected, *ETHNICITY)
     ethnicities.grid(row=7, column=1, columnspan=2)
 
     # Checkbox
-    CONDITIONS = [c['X'] for c in list(prolog.query("underlying_condition(X)"))]
+    CONDITIONS = [c['X'] for c in list(prolog.query("underlying_condition(X)"))] # This list stores all the underlying conditions stored in the knowledge base
     names = []
     variables = []
+    # Creates the names as well as the variables necessary for the creation of the checkboxes.
     for x in range(len(CONDITIONS)):
         names.append("cb" + str(x))
-        variables.append(StringVar(value="clicked"+str(x)))
+        variables.append(StringVar(value="clicked" + str(x)))
     k = 0
     i = 11
     j = 1
@@ -222,14 +227,15 @@ def add_patient():
         k += 1
         j += 1
 
-    SYMPTOMS = [s['A'] for s in list(prolog.query("symptoms(A,B)"))]
-    POINTS = [p['B'] for p in list(prolog.query("symptoms(A,B)"))]
+    SYMPTOMS = [s['A'] for s in list(prolog.query("symptoms(A,B)"))] # This list stores all the symptoms stored in the knowledge base
+    POINTS = [p['B'] for p in list(prolog.query("symptoms(A,B)"))] # This list stores all the point corrresponding to each symptom stored in the knowledge base
     values = []
     svariables = []
 
+    # Creates the names as well as the variables necessary for the creation of the checkboxes.
     for y in range(len(SYMPTOMS)):
         values.append("sym" + str(y))
-        svariables.append(StringVar(value="option"+str(y)))
+        svariables.append(StringVar(value="option" + str(y)))
 
     l = 0
     u = i + 1
@@ -246,7 +252,6 @@ def add_patient():
         values[l].deselect()
         l += 1
         e += 1
-
 
     # Radio Button
     gender = StringVar()
@@ -267,11 +272,9 @@ def add_patient():
 
     # Submit Button
     submit = Button(patient_frame, text="Submit", justify=CENTER, command=add_patient_to_prolog)
-    submit.grid(row=u+2, column=2)
+    submit.grid(row=u + 2, column=2)
     submit.rowconfigure(20, weight=1)
     submit.columnconfigure(2, weight=1)
-
-
 
 
 # Main Window
