@@ -73,7 +73,6 @@ def add_fact():
 def add_patient():
     global gender
     global ans
-    global clicked
 
     # Inner Commands
     def add_patient_to_prolog():
@@ -108,10 +107,19 @@ def add_patient():
             if variables[con].get() == "On":
                 conditions.append(str(CONDITIONS[con]).capitalize())
 
-        for f in (conditions):
+        for f in conditions:
             prolog.assertz("punderlying('" + pname + "','" + f + "')")
-            c = list(prolog.query("get_punderlying('" + pname + "',B)"))
-            print(c)
+            # c = list(prolog.query("get_punderlying('" + pname + "',B)"))
+            # print(c)
+
+        symptoms = []
+        ppoints = 0
+        for sym in range(len(SYMPTOMS)):
+            if svariables[sym].get() == "On":
+                ppoints += int(POINTS[sym])
+        prolog.assertz("patientstats('"+ pname + "'," + str(ppoints) + ")")
+        # c = list(prolog.query("patientstats('" + pname + "',B)"))
+        # print(c)
 
     def display_pressure(frame, val):
         global systolic
@@ -154,11 +162,12 @@ def add_patient():
     Label(patient_frame, text="Temperature (in Celsius)").grid(row=2, column=0)
     Label(patient_frame, text="Height (Ft)").grid(row=3, column=0)
     Label(patient_frame, text="Height (In)").grid(row=4, column=0)
-    Label(patient_frame, text="Ethnicity").grid(row=5, column=0)
+    Label(patient_frame, text="Weight").grid(row=5, column=0)
     Label(patient_frame, text="Gender").grid(row=6, column=0)
-    Label(patient_frame, text="Experienced dizziness, fainting or blurry vision?").grid(row=7, column=0)
-    Label(patient_frame, text="Weight").grid(row=8, column=0)
+    Label(patient_frame, text="Ethnicity").grid(row=7, column=0)
+    Label(patient_frame, text="Experienced dizziness, fainting or blurry vision?").grid(row=8, column=0)
     Label(patient_frame, text="Underlying condition").grid(row=11, column=0)
+    symptom = Label(patient_frame, text="Symptoms")
 
     # Text Boxes
     name = Entry(patient_frame, width=30)
@@ -173,14 +182,14 @@ def add_patient():
     temp.grid(row=2, column=1, columnspan=2)
     height1.grid(row=3, column=1, columnspan=2)
     height2.grid(row=4, column=1, columnspan=2)
-    weight.grid(row=8, column=1, columnspan=2)
+    weight.grid(row=5, column=1, columnspan=2)
 
     # Dropdown Menu
     selected = StringVar()
     ETHNICITY = [e['X'] for e in list(prolog.query("ethnicity(X)"))]
     selected.set(ETHNICITY[0])
     ethnicities = OptionMenu(patient_frame, selected, *ETHNICITY)
-    ethnicities.grid(row=5, column=1, columnspan=2)
+    ethnicities.grid(row=7, column=1, columnspan=2)
 
     # Checkbox
     CONDITIONS = [c['X'] for c in list(prolog.query("underlying_condition(X)"))]
@@ -195,13 +204,39 @@ def add_patient():
     for c in range(len(CONDITIONS)):
         variables[k] = StringVar()
         names[k] = Checkbutton(patient_frame, text=CONDITIONS[k], variable=variables[k], onvalue="On", offvalue="Off")
-        if j % 4 == 0:
+        if j % 5 == 0:
             i += 1
             j = 1
         names[k].grid(row=i, column=j)
         names[k].deselect()
         k += 1
         j += 1
+
+    SYMPTOMS = [s['A'] for s in list(prolog.query("symptoms(A,B)"))]
+    POINTS = [p['B'] for p in list(prolog.query("symptoms(A,B)"))]
+    values = []
+    svariables = []
+
+    for y in range(len(SYMPTOMS)):
+        values.append("sym" + str(y))
+        svariables.append(StringVar(value="option"+str(y)))
+
+    l = 0
+    u = i + 1
+    e = 1
+    symptom.grid(row=u, column=0)
+
+    for s in range(len(SYMPTOMS)):
+        svariables[l] = StringVar()
+        values[l] = Checkbutton(patient_frame, text=SYMPTOMS[l], variable=svariables[l], onvalue="On", offvalue="Off")
+        if e % 5 == 0:
+            u += 1
+            e = 1
+        values[l].grid(row=u, column=e)
+        values[l].deselect()
+        l += 1
+        e += 1
+
 
     # Radio Button
     gender = StringVar()
@@ -213,15 +248,20 @@ def add_patient():
     ans.set("no")
     ansbtn1 = Radiobutton(patient_frame, text="Yes", variable=ans, value="yes",
                           command=lambda: display_pressure(patient_frame, 0))
-    ansbtn1.grid(row=7, column=1)
+    ansbtn1.grid(row=8, column=1)
     ansbtn2 = Radiobutton(patient_frame, text="No", variable=ans, value="no",
                           command=lambda: display_pressure(patient_frame, 1))
-    ansbtn2.grid(row=7, column=2)
+    ansbtn2.grid(row=8, column=2)
 
     radio_buttons = [ansbtn1, ansbtn2]
 
     # Submit Button
-    Button(patient_frame, text="Submit", justify=CENTER, command=add_patient_to_prolog).grid(row=20, column=0)
+    submit = Button(patient_frame, text="Submit", justify=CENTER, command=add_patient_to_prolog)
+    submit.grid(row=u+2, column=2)
+    submit.rowconfigure(20, weight=1)
+    submit.columnconfigure(2, weight=1)
+
+
 
 
 # Main Window
