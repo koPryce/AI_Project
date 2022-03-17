@@ -4,30 +4,16 @@
 :- dynamic patientn/9.
 :- dynamic patientw/11.
 :- dynamic punderlying/2.
-:- dynamic patientstats/2.
 :- dynamic virusstats/5.
-
-
-%Rules
-get_patientn(A,B,C,D,E,F,G,H,I):- patientn(A,B,C,D,E,F,G,H,I).
-get_patientw(A,B,C,D,E,F,G,H,I,J,K):- patientw(A,B,C,D,E,F,G,H,I,J,K).
-get_punderlying(A,B):- punderlying(A,B).
 
 %Facts
 virusstats(0,0,0,0,0).
 
-underlying_condition('(empty)').
-underlying_condition(diabetes).
-underlying_condition(h).
-underlying_condition(l).
-underlying_condition(k).
-underlying_condition(p).
-underlying_condition(s).
-underlying_condition(d).
-underlying_condition(q).
+%underlying_condition(['(empty)']).
+underlying_condition('Diabetes').
 
-ethnicity('(empty)').
-%ethnicity('American').
+%ethnicity(['(empty)']).
+ethnicity('American').
 
 symptoms('Fever',1).
 symptoms('Cough',1).
@@ -45,6 +31,17 @@ symptoms('Shortness of Breath',3).
 symptoms('Loss of speech or mobility',3).
 symptoms('Confusion',3).
 symptoms('Chest Pain',3).
+
+%Rules
+get_patientn(A,B,C,D,E,F,G,H,I):- patientn(A,B,C,D,E,F,G,H,I).
+get_patientw(A,B,C,D,E,F,G,H,I,J,K):- patientw(A,B,C,D,E,F,G,H,I,J,K).
+get_punderlying(A,B):- punderlying(A,B).
+
+update_underlying_condition(Cond):- underlying_condition(Oldlist),append(Oldlist,[Cond],Newlist),
+                     retractall(underlying_condition(_)),assert(underlying_condition(Newlist)).
+
+update_ethnicity(Eth):- ethnicity(Oldlist),append(Oldlist,[Eth],Newlist),
+                     retractall(ethnicity(_)),assert(ethnicity(Newlist)).
 
 
 
