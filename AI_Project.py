@@ -33,9 +33,21 @@ def add_fact():
         prolog.assertz(
             "underlying_condition('" + cond + "')")  # Adds the underlying condition entered into the knowledge base
 
+        check = list(prolog.query("underlying_condition('" + cond + "')"))
+        if len(check) == 0:
+            messagebox.showerror("Error", "Underlying condition was not added.", parent=condition_window)
+        else:
+            messagebox.showinfo("Success", "Underlying condition was successfully added.", parent=condition_window)
+
     def sendEToDatabase():
         eth = ethnicitytb.get().capitalize()
         prolog.assertz("ethnicity('" + eth + "')")  # Adds the ethnicity entered into the knowledge base
+
+        check = list(prolog.query("ethnicity('" + eth + "')"))
+        if len(check) == 0:
+            messagebox.showerror("Error", "Ethnicity was not added.", parent=condition_window)
+        else:
+            messagebox.showinfo("Success", "Ethnicity was successfully added.", parent=condition_window)
 
     # This function brings up the widgets necessary to enter an underlying condition
     def condition():
@@ -77,7 +89,7 @@ def add_fact():
 
 # This function takes the information entered by the user about the patient and stores it into the knowledge base
 def add_patient():
-    global gender, ans
+    # global gender, ans
 
     # Inner Commands
     # Adds the information to Prolog
@@ -94,42 +106,58 @@ def add_patient():
         pgender = gender.get()
         pweight = weight.get()
         pdfb = ans.get()
+        psys = None
+        pdia = None
+        passage = True
 
         if pdfb == "yes":
             psys = systolic.get()
             pdia = diastolic.get()  # The systolic and diastolic values are retrieved if they experience dizziness, fainting or blurry vision
 
         if pname == "":
-            messagebox.showwarning("NO NAME", "No name was entered.")
+            messagebox.showwarning("NO NAME", "No name was entered.", parent=patient_window)
         elif page == "":
-            messagebox.showwarning("NO AGE", "No age was entered.")
+            messagebox.showwarning("NO AGE", "No age was entered.", parent=patient_window)
         elif ptemp == "":
-            messagebox.showwarning("NO TEMPERATURE", "No temperature was entered.")
+            messagebox.showwarning("NO TEMPERATURE", "No temperature was entered.", parent=patient_window)
         elif pheight1 == "":
-            messagebox.showwarning("NO HEIGHT", "No height (in feet) was entered.")
+            messagebox.showwarning("NO HEIGHT", "No height (in feet) was entered.", parent=patient_window)
         elif pheight2 == "":
-            messagebox.showwarning("NO HEIGHT", "No height (in inches) was entered.")
+            messagebox.showwarning("NO HEIGHT", "No height (in inches) was entered.", parent=patient_window)
         elif pweight == "":
-            messagebox.showwarning("NO WEIGHT", "No weight (in Kg) was entered.")
-        elif pdfb == "yes":
-            if psys == "":
-                messagebox.showwarning("NO SYSTOLIC PRESSURE", "No systolic pressure was entered was entered.")
-            elif pdia == "":
-                messagebox.showwarning("NO DIASTOLIC PRESSURE", "No diastolic pressre was entered.")
+            messagebox.showwarning("NO WEIGHT", "No weight (in Kg) was entered.", parent=patient_window)
         else:
             ptemp = str(float("{0:.2f}".format((int(ptemp) * 1.8) + 32)))
             if pdfb == "yes":
-                prolog.assertz("patientw('" + pname + "', " + page + "," + pheight1 + "," + pheight2 + "," + ptemp + ",'"
-                               + pethnicity + "'," + pgender + "," + pweight + "," + pdfb + "," + psys + "," + pdia + ")")
-                # c = list(prolog.query("get_patientw('" + pname + "',B,C,D,E,F,G,H,I,J,K)"))
-                #
-                # print(c)
+                psys = systolic.get()
+                pdia = diastolic.get()  # The systolic and diastolic values are retrieved if they experience dizziness, fainting or blurry vision
+                if psys == "":
+                    messagebox.showwarning("NO SYSTOLIC PRESSURE", "No systolic pressure was entered was entered.",
+                                           parent=patient_window)
+                elif pdia == "":
+                    messagebox.showwarning("NO DIASTOLIC PRESSURE", "No diastolic pressure was entered.",
+                                           parent=patient_window)
+                else:
+
+                    prolog.assertz(
+                        "patientw('" + pname + "', " + page + "," + pheight1 + "," + pheight2 + "," + ptemp + ",'"
+                        + pethnicity + "'," + pgender + "," + pweight + "," + pdfb + "," + psys + "," + pdia + ")")
+
+                    c = list(prolog.query("get_patientw('" + pname + "',B,C,D,E,F,G,H,I,J,K)"))
+                    if len(c) == 0:
+                        messagebox.showerror("Error", "Patient was not added.", parent=patient_window)
+                    else:
+                        messagebox.showinfo("Success", "Patient was added successfully.", parent=patient_window)
             else:
-                prolog.assertz("patientn('" + pname + "', " + page + "," + pheight1 + "," + pheight2 + "," + ptemp + ",'"
-                               + pethnicity + "'," + pgender + "," + pweight + "," + pdfb + ")")
-                # c = list(prolog.query("get_patientn('" + pname + "',B,C,D,E,F,G,H,I)"))
-                #
-                # print(c)
+                prolog.assertz(
+                    "patientn('" + pname + "', " + page + "," + pheight1 + "," + pheight2 + "," + ptemp + ",'"
+                    + pethnicity + "'," + pgender + "," + pweight + "," + pdfb + ")")
+
+                c = list(prolog.query("get_patientn('" + pname + "',B,C,D,E,F,G,H,I)"))
+                if len(c) == 0:
+                    messagebox.showerror("Error", "Patient was not added.", parent=patient_window)
+                else:
+                    messagebox.showinfo("Success", "Patient was added successfully.", parent=patient_window)
 
             # The underlying conditions selected by the user is added to prolog along with the name of the patient who
             # experienced them
@@ -138,12 +166,15 @@ def add_patient():
             for con in range(length):
                 if variables[con].get() == "On":
                     conditions.append(str(
-                        CONDITIONS[con]).capitalize())  # This list stores the underlying conditions the patient experienced
+                        CONDITIONS[
+                            con]).capitalize())  # This list stores the underlying conditions the patient experienced
 
             for f in conditions:
                 prolog.assertz("punderlying('" + pname + "','" + f + "')")
-                # c = list(prolog.query("get_punderlying('" + pname + "',B)"))
-                # print(c)
+            c = list(prolog.query("get_punderlying('" + pname + "',B)"))
+            print("Conditions")
+            print(c)
+            print()
 
             # The symptoms selected by the user is added to prolog along with the name of the patient who experienced them
             symptoms = []
@@ -158,6 +189,14 @@ def add_patient():
             for under in range(len(CONDITIONS)):
                 if variables[under].get() == "On":
                     underlying_conditions.append(CONDITIONS[under])
+
+            for h in symptoms:
+                prolog.assertz("psymptoms('" + pname + "','" + h + "')")
+
+            c = list(prolog.query("get_psymptoms('" + pname + "',B)"))
+            print("Symptoms")
+            print(c)
+            print()
 
             if 0 <= ppoints < 6:
                 diagnosis = "Based on the provided information, " + pname + " likely does not have the COVID virus."
@@ -188,6 +227,8 @@ def add_patient():
             # print(c)
             # c = list(prolog.query("virusstats(A,B,C,D,E)"))
             # print(c)
+
+
 
     # If the patient experienced dizziness, fainting or blurry vision, this function adds the option to enter the
     # systolic and diastolic pressures of the patient to the frame. If not, it removes the option.
@@ -391,7 +432,96 @@ def display_statistics():
 
 
 def diagnose_patient():
-    return
+    # Inner Commands
+    def retrieve_patient():
+        patient_age = None
+        patient_height1 = None
+        patient_height2 = None
+        patient_temp = None
+        patient_ethnicity = None
+        patient_gender = None
+        patient_weight = None
+        patient_experience = None
+        patient_systolic = None
+        patient_diastolic = None
+        pat_name = patient_name.get().capitalize()
+
+        patient_name.destroy()
+        patientlbl.destroy()
+        display.destroy()
+
+        patient_info1 = list(prolog.query("get_patientw('" + pat_name + "',B,C,D,E,F,G,H,I,J,K)"))
+        patient_info2 = list(prolog.query("get_patientn('" + pat_name + "',B,C,D,E,F,G,H,I)"))
+
+        if len(patient_info1) > 0:
+            patient_age = patient_info1[0]['B']
+            patient_height1 = patient_info1[0]['C']
+            patient_height2 = patient_info1[0]['D']
+            patient_temp = patient_info1[0]['E']
+            patient_ethnicity = patient_info1[0]['F']
+            patient_gender = patient_info1[0]['G']
+            patient_weight = patient_info1[0]['H']
+            patient_experience = patient_info1[0]['I']
+            patient_systolic = patient_info1[0]['J']
+            patient_diastolic = patient_info1[0]['K']
+            print(patient_age)
+            print(patient_height1)
+            print(patient_height2)
+            print(patient_temp)
+            print(patient_ethnicity)
+            print(patient_gender)
+            print(patient_weight)
+            print(patient_experience)
+            print(patient_systolic)
+            print(patient_diastolic)
+        elif len(patient_info2) > 0:
+            patient_age = patient_info2[0]['B']
+            patient_height1 = patient_info2[0]['C']
+            patient_height2 = patient_info2[0]['D']
+            patient_temp = patient_info2[0]['E']
+            patient_ethnicity = patient_info2[0]['F']
+            patient_gender = patient_info2[0]['G']
+            patient_weight = patient_info2[0]['H']
+            patient_experience = patient_info2[0]['I']
+            print(patient_age)
+            print(patient_height1)
+            print(patient_height2)
+            print(patient_temp)
+            print(patient_ethnicity)
+            print(patient_gender)
+            print(patient_weight)
+            print(patient_experience)
+        elif len(patient_info1) == 0 and len(patient_info2) == 0:
+            messagebox.showerror("Error", "Patient does not exist.", parent=diagnosis_window)
+
+        bmi = patient_weight/(((patient_height1 * 0.3048) + (patient_height2 * 0.0254)) ** 2)
+
+
+    # Window
+    diagnosis_window = Toplevel()
+    diagnosis_window.title('Patient Diagnosis')
+    diagnosis_window.iconbitmap('./favicon.ico')
+    diagnosis_window.configure(bg="#353535")
+    diagnosis_window.geometry("850x600")
+
+    # Frame
+    diagnosis_frame = LabelFrame(diagnosis_window, text="Condition Details", padx=40, pady=40, borderwidth=10,
+                                 bg="#fff")
+    diagnosis_frame.grid(row=0, column=0, padx=(80, 20), pady=100)
+
+    # Label
+    patientlbl = Label(diagnosis_frame, text="Enter the patient's name ")
+    patientlbl.grid(row=0, column=0)
+
+    # Text Box
+    patient_name = Entry(diagnosis_frame, width=30)
+    patient_name.grid(row=0, column=1, columnspan=2)
+
+    # Button
+    display = Button(diagnosis_frame, text="Display Patient", justify=CENTER, command=retrieve_patient)
+    display.grid(row=1, column=2)
+    display.rowconfigure(20, weight=1)
+    display.columnconfigure(2, weight=1)
 
 
 # Main Window

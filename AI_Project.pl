@@ -4,12 +4,13 @@
 :- dynamic patientn/9.
 :- dynamic patientw/11.
 :- dynamic punderlying/2.
+:- dynamic psymptoms/2.
 :- dynamic virusstats/5.
 
 %Facts
 virusstats(0,0,0,0,0).
 
-%underlying_condition(['(empty)']).
+%underlying_condition(['(empty)','Ash']).
 underlying_condition('Diabetes').
 
 %ethnicity(['(empty)']).
@@ -36,12 +37,17 @@ symptoms('Chest Pain',3).
 get_patientn(A,B,C,D,E,F,G,H,I):- patientn(A,B,C,D,E,F,G,H,I).
 get_patientw(A,B,C,D,E,F,G,H,I,J,K):- patientw(A,B,C,D,E,F,G,H,I,J,K).
 get_punderlying(A,B):- punderlying(A,B).
+get_psymptoms(A,B):- psymptoms(A,B).
 
-update_underlying_condition(Cond):- underlying_condition(Oldlist),append(Oldlist,[Cond],Newlist),
+/*update_underlying_condition(Cond):- underlying_condition(Oldlist),append(Oldlist,[Cond],Newlist),
                      retractall(underlying_condition(_)),assert(underlying_condition(Newlist)).
 
 update_ethnicity(Eth):- ethnicity(Oldlist),append(Oldlist,[Eth],Newlist),
                      retractall(ethnicity(_)),assert(ethnicity(Newlist)).
+
+member_condition(Cond):- underlying_condition(List), member(Cond,List).
+member_ethnicity(Eth):- ethnicity(List), member(Eth,List).*/
+
 
 
 
