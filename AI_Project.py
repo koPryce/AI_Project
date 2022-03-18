@@ -112,7 +112,7 @@ def add_patient():
 
         if pdfb == "yes":
             psys = systolic.get()
-            pdia = diastolic.get()  # The systolic and diastolic values are retrieved if they experience dizziness, fainting or blurry vision
+            pdia = diastolic.get()  # The systolic and diastolic values are retrieved if they experience dizziness, fainting or blurried vision
 
         if pname == "":
             messagebox.showwarning("NO NAME", "No name was entered.", parent=patient_window)
@@ -130,7 +130,7 @@ def add_patient():
             ptemp = str(float("{0:.2f}".format((int(ptemp) * 1.8) + 32)))
             if pdfb == "yes":
                 psys = systolic.get()
-                pdia = diastolic.get()  # The systolic and diastolic values are retrieved if they experience dizziness, fainting or blurry vision
+                pdia = diastolic.get()  # The systolic and diastolic values are retrieved if they experience dizziness, fainting or blurried vision
                 if psys == "":
                     messagebox.showwarning("NO SYSTOLIC PRESSURE", "No systolic pressure was entered was entered.",
                                            parent=patient_window)
@@ -228,9 +228,7 @@ def add_patient():
             # c = list(prolog.query("virusstats(A,B,C,D,E)"))
             # print(c)
 
-
-
-    # If the patient experienced dizziness, fainting or blurry vision, this function adds the option to enter the
+    # If the patient experienced dizziness, fainting or blurried vision, this function adds the option to enter the
     # systolic and diastolic pressures of the patient to the frame. If not, it removes the option.
     def display_pressure(frame, val):
         global systolic, diastolic, syslbl, dialbl
@@ -273,7 +271,7 @@ def add_patient():
     Label(patient_frame, text="Weight (in Kg)").grid(row=5, column=0)
     Label(patient_frame, text="Gender").grid(row=6, column=0)
     Label(patient_frame, text="Ethnicity").grid(row=7, column=0)
-    Label(patient_frame, text="Experienced dizziness, fainting or blurry vision?").grid(row=8, column=0)
+    Label(patient_frame, text="Experienced dizziness, fainting or blurried vision?").grid(row=8, column=0)
     Label(patient_frame, text="Underlying condition").grid(row=11, column=0)
     symptom = Label(patient_frame, text="Symptoms")
 
@@ -458,44 +456,137 @@ def diagnose_patient():
             patient_height1 = patient_info1[0]['C']
             patient_height2 = patient_info1[0]['D']
             patient_temp = patient_info1[0]['E']
-            patient_ethnicity = patient_info1[0]['F']
-            patient_gender = patient_info1[0]['G']
+            patient_ethnicity = patient_info1[0]['F'].capitalize()
+            patient_gender = patient_info1[0]['G'].capitalize()
             patient_weight = patient_info1[0]['H']
-            patient_experience = patient_info1[0]['I']
+            patient_experience = patient_info1[0]['I'].capitalize()
             patient_systolic = patient_info1[0]['J']
             patient_diastolic = patient_info1[0]['K']
-            print(patient_age)
-            print(patient_height1)
-            print(patient_height2)
-            print(patient_temp)
-            print(patient_ethnicity)
-            print(patient_gender)
-            print(patient_weight)
-            print(patient_experience)
-            print(patient_systolic)
-            print(patient_diastolic)
+
+            patient_height = ((float(patient_height1) * 0.3048) + (float(patient_height2) * 0.0254))
+
+            bmi = float("{0:.2f}".format(patient_weight / (patient_height ** 2)))
+
+            Label(diagnosis_frame, text="Name: " + pat_name, justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="Age: " + patient_age + " years old", justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="Gender: " + patient_gender, justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="Ethnicity: " + patient_ethnicity, justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="Temperature: " + patient_temp + "°F", justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="Height: " + str(patient_height) + "m", justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="Weight: " + patient_weight + "kg", justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="BMI: " + str(bmi), justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="Systolic Pressure: " + patient_systolic + " mm Hg", justify=CENTER,
+                  bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="Diastolic Pressure: " + patient_diastolic + " mm Hg", justify=CENTER,
+                  bg="#fff").pack(pady=10)
+            Label(diagnosis_frame,
+                  text="Experienced dizziness, fainting or blurred vision: " + patient_experience, justify=CENTER,
+                  bg="#fff").pack(pady=10)
+
+            if bmi < 18.5:
+                Label(diagnosis_frame,
+                      text="Based on this person's bmi, they are underweight", justify=CENTER,
+                      bg="#fff").pack(pady=10)
+            elif 18.5 < bmi < 24.9:
+                Label(diagnosis_frame,
+                      text="Based on this person's bmi, they are healthy", justify=CENTER,
+                      bg="#fff").pack(pady=10)
+            elif 25.0 < bmi < 29.9:
+                Label(diagnosis_frame,
+                      text="Based on this person's bmi, they are overweight", justify=CENTER,
+                      bg="#fff").pack(pady=10)
+            else:
+                Label(diagnosis_frame,
+                      text="Based on this person's bmi, they are obese", justify=CENTER,
+                      bg="#fff").pack(pady=10)
+
+            if patient_systolic < 90 or patient_diastolic < 60:
+                Label(diagnosis_frame, text="Patient has low blood pressure", justify=CENTER, bg="#fff").pack(pady=10)
+
+            condition_list = [c['X'] for c in list(prolog.query("punderlying('" + pat_name + "',X)"))]
+
+            symptoms_list = [s['X'] for s in list(prolog.query("psymptoms('" + pat_name + "',X)"))]
+
+            condition_tb = Text(diagnosis_frame, height=10, width=50)
+            condition_tb.config(state="normal")
+            for c in condition_list:
+                condition_tb.insert(INSERT, str(c) + "\n")
+
+            condition_tb.config(state=DISABLED)
+            condition_tb.pack(pady=10)
+
+            symptoms_tb = Text(diagnosis_frame, height=10, width=50)
+            symptoms_tb.config(state="normal")
+            for s in symptoms_list:
+                symptoms_tb.insert(INSERT, str(s) + "\n")
+
+            symptoms_tb.config(state=DISABLED)
+            symptoms_tb.pack(pady=10)
+
         elif len(patient_info2) > 0:
             patient_age = patient_info2[0]['B']
             patient_height1 = patient_info2[0]['C']
             patient_height2 = patient_info2[0]['D']
             patient_temp = patient_info2[0]['E']
-            patient_ethnicity = patient_info2[0]['F']
-            patient_gender = patient_info2[0]['G']
+            patient_ethnicity = patient_info2[0]['F'].capitalize()
+            patient_gender = patient_info2[0]['G'].capitalize()
             patient_weight = patient_info2[0]['H']
-            patient_experience = patient_info2[0]['I']
-            print(patient_age)
-            print(patient_height1)
-            print(patient_height2)
-            print(patient_temp)
-            print(patient_ethnicity)
-            print(patient_gender)
-            print(patient_weight)
-            print(patient_experience)
+            patient_experience = patient_info2[0]['I'].capitalize()
+
+            patient_height = ((float(patient_height1) * 0.3048) + (float(patient_height2) * 0.0254))
+
+            bmi = float("{0:.2f}".format(patient_weight / (patient_height ** 2)))
+
+            Label(diagnosis_frame, text="Name: " + pat_name, justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="Age: " + patient_age + " years old", justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="Gender: " + patient_gender, justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="Ethnicity: " + patient_ethnicity, justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="Temperature: " + patient_temp + "°F", justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="Height: " + str(patient_height) + "m", justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="Weight: " + patient_weight + "kg", justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame, text="BMI: " + str(bmi), justify=CENTER, bg="#fff").pack(pady=10)
+            Label(diagnosis_frame,
+                  text="Experienced dizziness, fainting or blurred vision: " + patient_experience, justify=CENTER,
+                  bg="#fff").pack(pady=10)
+            if bmi < 18.5:
+                Label(diagnosis_frame,
+                      text="Based on this person's bmi, they are underweight", justify=CENTER,
+                      bg="#fff").pack(pady=10)
+            elif 18.5 < bmi < 24.9:
+                Label(diagnosis_frame,
+                      text="Based on this person's bmi, they are healthy", justify=CENTER,
+                      bg="#fff").pack(pady=10)
+            elif 25.0 < bmi < 29.9:
+                Label(diagnosis_frame,
+                      text="Based on this person's bmi, they are overweight", justify=CENTER,
+                      bg="#fff").pack(pady=10)
+            else:
+                Label(diagnosis_frame,
+                      text="Based on this person's bmi, they are obese", justify=CENTER,
+                      bg="#fff").pack(pady=10)
+
+            condition_list = [c['X'] for c in list(prolog.query("punderlying('" + pat_name + "',X)"))]
+
+            symptoms_list = [s['X'] for s in list(prolog.query("psymptoms('" + pat_name + "',X)"))]
+
+            condition_tb = Text(diagnosis_frame, height=10, width=50)
+            condition_tb.config(state="normal")
+            for c in condition_list:
+                condition_tb.insert(INSERT, str(c) + "\n")
+
+            condition_tb.config(state=DISABLED)
+            condition_tb.pack(pady=10)
+
+            symptoms_tb = Text(diagnosis_frame, height=10, width=50)
+            symptoms_tb.config(state="normal")
+            for s in symptoms_list:
+                symptoms_tb.insert(INSERT, str(s) + "\n")
+
+            symptoms_tb.config(state=DISABLED)
+            symptoms_tb.pack(pady=10)
+
         elif len(patient_info1) == 0 and len(patient_info2) == 0:
             messagebox.showerror("Error", "Patient does not exist.", parent=diagnosis_window)
-
-        bmi = patient_weight/(((patient_height1 * 0.3048) + (patient_height2 * 0.0254)) ** 2)
-
 
     # Window
     diagnosis_window = Toplevel()
