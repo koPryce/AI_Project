@@ -1,6 +1,6 @@
 from tkinter import *
 from pyswip import Prolog
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 # Used to connect to the Prolog Knowledge Base
 prolog = Prolog()
@@ -30,24 +30,30 @@ def add_fact():
 
     def sendCToDatabase():
         cond = conditiontb.get().capitalize()
-        prolog.assertz(
-            "underlying_condition('" + cond + "')")  # Adds the underlying condition entered into the knowledge base
-
-        check = list(prolog.query("underlying_condition('" + cond + "')"))
-        if len(check) == 0:
-            messagebox.showerror("Error", "Underlying condition was not added.", parent=condition_window)
+        if cond == "":
+            messagebox.showerror("Error", "Text Field is empty. Enter a condition.", parent=condition_window)
         else:
-            messagebox.showinfo("Success", "Underlying condition was successfully added.", parent=condition_window)
+            prolog.assertz(
+                "underlying_condition('" + cond + "')")  # Adds the underlying condition entered into the knowledge base
+
+            check = list(prolog.query("underlying_condition('" + cond + "')"))
+            if len(check) == 0:
+                messagebox.showerror("Error", "Underlying condition was not added.", parent=condition_window)
+            else:
+                messagebox.showinfo("Success", "Underlying condition was successfully added.", parent=condition_window)
 
     def sendEToDatabase():
         eth = ethnicitytb.get().capitalize()
-        prolog.assertz("ethnicity('" + eth + "')")  # Adds the ethnicity entered into the knowledge base
-
-        check = list(prolog.query("ethnicity('" + eth + "')"))
-        if len(check) == 0:
-            messagebox.showerror("Error", "Ethnicity was not added.", parent=condition_window)
+        if eth == "":
+            messagebox.showerror("Error", "Text Field is empty. Enter an ethnicity.", parent=condition_window)
         else:
-            messagebox.showinfo("Success", "Ethnicity was successfully added.", parent=condition_window)
+            prolog.assertz("ethnicity('" + eth + "')")  # Adds the ethnicity entered into the knowledge base
+
+            check = list(prolog.query("ethnicity('" + eth + "')"))
+            if len(check) == 0:
+                messagebox.showerror("Error", "Ethnicity was not added.", parent=condition_window)
+            else:
+                messagebox.showinfo("Success", "Ethnicity was successfully added.", parent=condition_window)
 
     # This function brings up the widgets necessary to enter an underlying condition
     def condition():
@@ -171,10 +177,10 @@ def add_patient():
 
             for f in conditions:
                 prolog.assertz("punderlying('" + pname + "','" + f + "')")
-            c = list(prolog.query("get_punderlying('" + pname + "',B)"))
-            print("Conditions")
-            print(c)
-            print()
+            # c = list(prolog.query("get_punderlying('" + pname + "',B)"))
+            # print("Conditions")
+            # print(c)
+            # print()
 
             # The symptoms selected by the user is added to prolog along with the name of the patient who experienced them
             symptoms = []
@@ -193,30 +199,30 @@ def add_patient():
             for h in symptoms:
                 prolog.assertz("psymptoms('" + pname + "','" + h + "')")
 
-            c = list(prolog.query("get_psymptoms('" + pname + "',B)"))
-            print("Symptoms")
-            print(c)
-            print()
+            # c = list(prolog.query("get_psymptoms('" + pname + "',B)"))
+            # print("Symptoms")
+            # print(c)
+            # print()
 
             if 0 <= ppoints < 6:
-                diagnosis = "Based on the provided information, " + pname + " likely does not have the COVID virus."
+                diagnosis = "Based on the provided information, " + pname + " likely does not have the COVID virus"
             elif 6 <= ppoints < 17:
                 mild += 1
                 if lot and len(underlying_conditions) > 0:
                     owupoint += 1
-                    diagnosis = "Based on the provided information, " + pname + " likely has the Omicron variant of the COVID virus with underlying conditions."
+                    diagnosis = "Based on the provided information, " + pname + " likely has the Omicron variant of the COVID virus with underlying conditions"
                 elif lot:
                     opoint += 1
-                    diagnosis = "Based on the provided information, " + pname + " likely has the Omicron variant of the COVID virus."
+                    diagnosis = "Based on the provided information, " + pname + " likely has the Omicron variant of the COVID virus"
                 else:
-                    diagnosis = "Based on the provided information, " + pname + " has mild symptoms of the COVID virus."
+                    diagnosis = "Based on the provided information, " + pname + " has mild symptoms of the COVID virus"
             elif ppoints >= 17:
                 severe += 1
                 if lot:
                     dpoint += 1
-                    diagnosis = "Based on the provided information, " + pname + " likely has the Delta variant of the COVID virus."
+                    diagnosis = "Based on the provided information, " + pname + " likely has the Delta variant of the COVID virus"
                 else:
-                    diagnosis = "Based on the provided information, " + pname + " likely has the Regular Variant of the COVID virus."
+                    diagnosis = "Based on the provided information, " + pname + " likely has the Regular Variant of the COVID virus"
 
             prolog.retractall("virusstats(_,_,_,_,_)")
             prolog.assertz(
@@ -294,6 +300,10 @@ def add_patient():
     selected = StringVar()
     ETHNICITY = [e['X'] for e in list(
         prolog.query("ethnicity(X)"))]  # This list stores all the risky ethnicities stored in the knowledge base
+
+    if len(ETHNICITY) > 1:
+        ETHNICITY.pop(0)
+
     selected.set(ETHNICITY[0])
     ethnicities = OptionMenu(patient_frame, selected, *ETHNICITY)
     ethnicities.grid(row=7, column=1, columnspan=2)
@@ -303,6 +313,10 @@ def add_patient():
         "underlying_condition(X)"))]  # This list stores all the underlying conditions stored in the knowledge base
     names = []
     variables = []
+
+    if len(CONDITIONS) > 1:
+        CONDITIONS.pop(0)
+
     # Creates the names as well as the variables necessary for the creation of the checkboxes.
     for x in range(len(CONDITIONS)):
         names.append("cb" + str(x))
@@ -383,9 +397,6 @@ def display_statistics():
             mosres += pstatistics[0][i]
         else:
             doores += pstatistics[0][i]
-        print("Total for severe/mild: " + str(mosres))
-        print("Total for COVID TYPE: " + str(doores))
-        print()
         i += 1
 
     if mosres > 0:
@@ -467,47 +478,50 @@ def diagnose_patient():
 
             bmi = float("{0:.2f}".format(patient_weight / (patient_height ** 2)))
 
-            Label(diagnosis_frame, text="Name: " + pat_name, justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="Age: " + patient_age + " years old", justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="Gender: " + patient_gender, justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="Ethnicity: " + patient_ethnicity, justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="Temperature: " + patient_temp + "°F", justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="Height: " + str(patient_height) + "m", justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="Weight: " + patient_weight + "kg", justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="BMI: " + str(bmi), justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="Systolic Pressure: " + patient_systolic + " mm Hg", justify=CENTER,
+            Label(subdiagnosis_frame, text="Name: " + pat_name, justify=CENTER, bg="#fff").pack(pady=10)
+            Label(subdiagnosis_frame, text="Age: " + str(patient_age) + " years old", justify=CENTER, bg="#fff").pack(
+                pady=10)
+            Label(subdiagnosis_frame, text="Gender: " + patient_gender, justify=CENTER, bg="#fff").pack(pady=10)
+            Label(subdiagnosis_frame, text="Ethnicity: " + patient_ethnicity, justify=CENTER, bg="#fff").pack(pady=10)
+            Label(subdiagnosis_frame, text="Temperature: " + str(patient_temp) + "°F", justify=CENTER, bg="#fff").pack(
+                pady=10)
+            Label(subdiagnosis_frame, text="Height: " + str(patient_height) + "m", justify=CENTER, bg="#fff").pack(pady=10)
+            Label(subdiagnosis_frame, text="Weight: " + str(patient_weight) + "kg", justify=CENTER, bg="#fff").pack(
+                pady=10)
+            Label(subdiagnosis_frame, text="BMI: " + str(bmi), justify=CENTER, bg="#fff").pack(pady=10)
+            Label(subdiagnosis_frame, text="Systolic Pressure: " + str(patient_systolic) + " mm Hg", justify=CENTER,
                   bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="Diastolic Pressure: " + patient_diastolic + " mm Hg", justify=CENTER,
+            Label(subdiagnosis_frame, text="Diastolic Pressure: " + str(patient_diastolic) + " mm Hg", justify=CENTER,
                   bg="#fff").pack(pady=10)
-            Label(diagnosis_frame,
+            Label(subdiagnosis_frame,
                   text="Experienced dizziness, fainting or blurred vision: " + patient_experience, justify=CENTER,
                   bg="#fff").pack(pady=10)
 
             if bmi < 18.5:
-                Label(diagnosis_frame,
+                Label(subdiagnosis_frame,
                       text="Based on this person's bmi, they are underweight", justify=CENTER,
                       bg="#fff").pack(pady=10)
             elif 18.5 < bmi < 24.9:
-                Label(diagnosis_frame,
+                Label(subdiagnosis_frame,
                       text="Based on this person's bmi, they are healthy", justify=CENTER,
                       bg="#fff").pack(pady=10)
             elif 25.0 < bmi < 29.9:
-                Label(diagnosis_frame,
+                Label(subdiagnosis_frame,
                       text="Based on this person's bmi, they are overweight", justify=CENTER,
                       bg="#fff").pack(pady=10)
             else:
-                Label(diagnosis_frame,
+                Label(subdiagnosis_frame,
                       text="Based on this person's bmi, they are obese", justify=CENTER,
                       bg="#fff").pack(pady=10)
 
             if patient_systolic < 90 or patient_diastolic < 60:
-                Label(diagnosis_frame, text="Patient has low blood pressure", justify=CENTER, bg="#fff").pack(pady=10)
+                Label(subdiagnosis_frame, text="Patient has low blood pressure", justify=CENTER, bg="#fff").pack(pady=10)
 
             condition_list = [c['X'] for c in list(prolog.query("punderlying('" + pat_name + "',X)"))]
 
             symptoms_list = [s['X'] for s in list(prolog.query("psymptoms('" + pat_name + "',X)"))]
 
-            condition_tb = Text(diagnosis_frame, height=10, width=50)
+            condition_tb = Text(subdiagnosis_frame, height=10, width=50)
             condition_tb.config(state="normal")
             for c in condition_list:
                 condition_tb.insert(INSERT, str(c) + "\n")
@@ -515,13 +529,16 @@ def diagnose_patient():
             condition_tb.config(state=DISABLED)
             condition_tb.pack(pady=10)
 
-            symptoms_tb = Text(diagnosis_frame, height=10, width=50)
+            symptoms_tb = Text(subdiagnosis_frame, height=10, width=50)
             symptoms_tb.config(state="normal")
             for s in symptoms_list:
                 symptoms_tb.insert(INSERT, str(s) + "\n")
 
             symptoms_tb.config(state=DISABLED)
             symptoms_tb.pack(pady=10)
+
+            patient_diagnosis = [d['X'] for d in list(prolog.query("get_patientstats('" + pat_name + "',X)"))]
+            Label(subdiagnosis_frame, text="Diagnosis: " + patient_diagnosis[0] + ".", justify=CENTER, bg="#fff").pack(pady=10)
 
         elif len(patient_info2) > 0:
             patient_age = patient_info2[0]['B']
@@ -537,31 +554,36 @@ def diagnose_patient():
 
             bmi = float("{0:.2f}".format(patient_weight / (patient_height ** 2)))
 
-            Label(diagnosis_frame, text="Name: " + pat_name, justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="Age: " + patient_age + " years old", justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="Gender: " + patient_gender, justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="Ethnicity: " + patient_ethnicity, justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="Temperature: " + patient_temp + "°F", justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="Height: " + str(patient_height) + "m", justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="Weight: " + patient_weight + "kg", justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame, text="BMI: " + str(bmi), justify=CENTER, bg="#fff").pack(pady=10)
-            Label(diagnosis_frame,
+            Label(subdiagnosis_frame, text="Name: " + pat_name, justify=CENTER, bg="#fff").pack(pady=10)
+            Label(subdiagnosis_frame, text="Age: " + str(patient_age) + " years old", justify=CENTER, bg="#fff").pack(
+                pady=10)
+            Label(subdiagnosis_frame, text="Gender: " + patient_gender, justify=CENTER, bg="#fff").pack(pady=10)
+            Label(subdiagnosis_frame, text="Ethnicity: " + patient_ethnicity, justify=CENTER, bg="#fff").pack(pady=10)
+            Label(subdiagnosis_frame, text="Temperature: " + str(patient_temp) + "°F", justify=CENTER, bg="#fff").pack(
+                pady=10)
+            Label(subdiagnosis_frame, text="Height: " + str(patient_height) + "m", justify=CENTER, bg="#fff").pack(
+                pady=10)
+            Label(subdiagnosis_frame, text="Weight: " + str(patient_weight) + "kg", justify=CENTER, bg="#fff").pack(
+                pady=10)
+            Label(subdiagnosis_frame, text="BMI: " + str(bmi), justify=CENTER, bg="#fff").pack(pady=10)
+            Label(subdiagnosis_frame,
                   text="Experienced dizziness, fainting or blurred vision: " + patient_experience, justify=CENTER,
                   bg="#fff").pack(pady=10)
+
             if bmi < 18.5:
-                Label(diagnosis_frame,
+                Label(subdiagnosis_frame,
                       text="Based on this person's bmi, they are underweight", justify=CENTER,
                       bg="#fff").pack(pady=10)
             elif 18.5 < bmi < 24.9:
-                Label(diagnosis_frame,
+                Label(subdiagnosis_frame,
                       text="Based on this person's bmi, they are healthy", justify=CENTER,
                       bg="#fff").pack(pady=10)
             elif 25.0 < bmi < 29.9:
-                Label(diagnosis_frame,
+                Label(subdiagnosis_frame,
                       text="Based on this person's bmi, they are overweight", justify=CENTER,
                       bg="#fff").pack(pady=10)
             else:
-                Label(diagnosis_frame,
+                Label(subdiagnosis_frame,
                       text="Based on this person's bmi, they are obese", justify=CENTER,
                       bg="#fff").pack(pady=10)
 
@@ -569,7 +591,7 @@ def diagnose_patient():
 
             symptoms_list = [s['X'] for s in list(prolog.query("psymptoms('" + pat_name + "',X)"))]
 
-            condition_tb = Text(diagnosis_frame, height=10, width=50)
+            condition_tb = Text(subdiagnosis_frame, height=10, width=50)
             condition_tb.config(state="normal")
             for c in condition_list:
                 condition_tb.insert(INSERT, str(c) + "\n")
@@ -577,13 +599,17 @@ def diagnose_patient():
             condition_tb.config(state=DISABLED)
             condition_tb.pack(pady=10)
 
-            symptoms_tb = Text(diagnosis_frame, height=10, width=50)
+            symptoms_tb = Text(subdiagnosis_frame, height=10, width=50)
             symptoms_tb.config(state="normal")
             for s in symptoms_list:
                 symptoms_tb.insert(INSERT, str(s) + "\n")
 
             symptoms_tb.config(state=DISABLED)
             symptoms_tb.pack(pady=10)
+
+            patient_diagnosis = [d['X'] for d in list(prolog.query("get_patientstats('" + pat_name + "',X)"))]
+            Label(subdiagnosis_frame, text="Diagnosis: " + patient_diagnosis[0] + ".", justify=CENTER, bg="#fff").pack(
+                pady=10)
 
         elif len(patient_info1) == 0 and len(patient_info2) == 0:
             messagebox.showerror("Error", "Patient does not exist.", parent=diagnosis_window)
@@ -595,21 +621,39 @@ def diagnose_patient():
     diagnosis_window.configure(bg="#353535")
     diagnosis_window.geometry("850x600")
 
-    # Frame
+    # Main Frame
     diagnosis_frame = LabelFrame(diagnosis_window, text="Condition Details", padx=40, pady=40, borderwidth=10,
                                  bg="#fff")
-    diagnosis_frame.grid(row=0, column=0, padx=(80, 20), pady=100)
+    # diagnosis_frame.grid(row=0, column=0, padx=(80, 20), pady=100)
+    diagnosis_frame.pack(fill=BOTH, expand=1)
+
+    # Canvas
+    canvas = Canvas(diagnosis_frame)
+    canvas.pack(side=LEFT, fill=BOTH, expand=1)
+
+    # Scrollbar
+    scrollbar = ttk.Scrollbar(diagnosis_frame, orient=VERTICAL, command=canvas.yview)
+    scrollbar.pack(side=RIGHT, fill=Y)
+
+    canvas.configure(yscrollcommand=scrollbar.set)
+    canvas.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+
+    # Sub Frame
+    subdiagnosis_frame = Frame(canvas)
+
+    # Sub Window
+    canvas.create_window((0, 0), window=subdiagnosis_frame, anchor=NW)
 
     # Label
-    patientlbl = Label(diagnosis_frame, text="Enter the patient's name ")
+    patientlbl = Label(subdiagnosis_frame, text="Enter the patient's name ")
     patientlbl.grid(row=0, column=0)
 
     # Text Box
-    patient_name = Entry(diagnosis_frame, width=30)
+    patient_name = Entry(subdiagnosis_frame, width=30)
     patient_name.grid(row=0, column=1, columnspan=2)
 
     # Button
-    display = Button(diagnosis_frame, text="Display Patient", justify=CENTER, command=retrieve_patient)
+    display = Button(subdiagnosis_frame, text="Display Patient", justify=CENTER, command=retrieve_patient)
     display.grid(row=1, column=2)
     display.rowconfigure(20, weight=1)
     display.columnconfigure(2, weight=1)
