@@ -6,6 +6,7 @@ from tkinter import messagebox, ttk
 prolog = Prolog()
 prolog.consult("AI_Project.pl")
 
+regular = 0
 mild = 0
 severe = 0
 owupoint = 0
@@ -17,10 +18,11 @@ opoint = 0
 # This command adds facts entered by the user into the knowledge base
 def add_fact():
     # Inner Commands
-    # This function brings up the widgets necessary to enter a risky ethnicity
+    # This function brings up the widgets necessary to enter an at risk ethnicity
     def ethnicity():
         conditionbtn.destroy()
         ethnicitybtn.destroy()
+        locationbtn.destroy()
         ethnicitylbl.grid(row=0, column=0)
         ethnicitytb.grid(row=0, column=1)
         esubmitbtn = Button(condition_window, text="Submit", command=sendEToDatabase)
@@ -28,37 +30,11 @@ def add_fact():
         backbtn = Button(condition_window, text="Go Back", command=read_fact)
         backbtn.grid(row=1, column=1)
 
-    def sendCToDatabase():
-        cond = conditiontb.get().capitalize()
-        if cond == "":
-            messagebox.showerror("Error", "Text Field is empty. Enter a condition.", parent=condition_window)
-        else:
-            prolog.assertz(
-                "underlying_condition('" + cond + "')")  # Adds the underlying condition entered into the knowledge base
-
-            check = list(prolog.query("underlying_condition('" + cond + "')"))
-            if len(check) == 0:
-                messagebox.showerror("Error", "Underlying condition was not added.", parent=condition_window)
-            else:
-                messagebox.showinfo("Success", "Underlying condition was successfully added.", parent=condition_window)
-
-    def sendEToDatabase():
-        eth = ethnicitytb.get().capitalize()
-        if eth == "":
-            messagebox.showerror("Error", "Text Field is empty. Enter an ethnicity.", parent=condition_window)
-        else:
-            prolog.assertz("ethnicity('" + eth + "')")  # Adds the ethnicity entered into the knowledge base
-
-            check = list(prolog.query("ethnicity('" + eth + "')"))
-            if len(check) == 0:
-                messagebox.showerror("Error", "Ethnicity was not added.", parent=condition_window)
-            else:
-                messagebox.showinfo("Success", "Ethnicity was successfully added.", parent=condition_window)
-
     # This function brings up the widgets necessary to enter an underlying condition
     def condition():
         conditionbtn.destroy()
         ethnicitybtn.destroy()
+        locationbtn.destroy()
         conditionlbl.grid(row=0, column=0)
         conditiontb.grid(row=0, column=1)
         csubmitbtn = Button(condition_window, text="Submit", command=sendCToDatabase)
@@ -66,7 +42,62 @@ def add_fact():
         backbtn = Button(condition_window, text="Go Back", command=read_fact)
         backbtn.grid(row=1, column=1)
 
-    # Allows the user to go back to choose whether to enter an at risk ethnicity or an underlying condition
+    # This function brings up the widgets necessary to enter an at risk location
+    def location():
+        conditionbtn.destroy()
+        ethnicitybtn.destroy()
+        locationbtn.destroy()
+        locationlbl.grid(row=0, column=0)
+        locationtb.grid(row=0, column=1)
+        lsubmitbtn = Button(condition_window, text="Submit", command=sendLToDatabase)
+        lsubmitbtn.grid(row=1, column=0)
+        backbtn = Button(condition_window, text="Go Back", command=read_fact)
+        backbtn.grid(row=1, column=1)
+
+    # This function sends the underlying_condition to the knowledge base
+    def sendCToDatabase():
+        cond = conditiontb.get().capitalize()
+        if cond == "":
+            messagebox.showerror("Error", "Text Field is empty. Enter a condition.", parent=condition_window)
+        else:
+            check = list(prolog.query(
+                "update_condition('" + cond + "', X)"))  # Adds the underlying condition entered into the knowledge base and returned the new condition list.
+            print(check)
+            if len(check) == 1:
+                messagebox.showerror("Error", "Underlying condition was not added.", parent=condition_window)
+            else:
+                conditiontb.delete(0, END)
+                messagebox.showinfo("Success", "Underlying condition was successfully added.", parent=condition_window)
+
+    # This function sends the ethnicity to the knowledge base
+    def sendEToDatabase():
+        eth = ethnicitytb.get().capitalize()
+        if eth == "":
+            messagebox.showerror("Error", "Text Field is empty. Enter an ethnicity.", parent=condition_window)
+        else:
+            check = list(prolog.query(
+                "update_ethnicity('" + eth + "', X)"))  # Adds the ethnicity entered into the knowledge base and returns the new ethnicity list.
+            if len(check) == 1:
+                messagebox.showerror("Error", "Ethnicity was not added.", parent=condition_window)
+            else:
+                ethnicitytb.delete(0, END)
+                messagebox.showinfo("Success", "Ethnicity was successfully added.", parent=condition_window)
+
+    # This function sends the location to the knowledge base
+    def sendLToDatabase():
+        loc = locationtb.get().capitalize()
+        if loc == "":
+            messagebox.showerror("Error", "Text Field is empty. Enter a location.", parent=condition_window)
+        else:
+            check = list(prolog.query(
+                "update_location('" + loc + "', X)"))  # Adds the location entered into the knowledge base and returns the new location list.
+            if len(check) == 1:
+                messagebox.showerror("Error", "Location was not added.", parent=condition_window)
+            else:
+                locationtb.delete(0, END)
+                messagebox.showinfo("Success", "Location was successfully added.", parent=condition_window)
+
+    # Allows the user to go back to choose whether to enter an at risk ethnicity, at risk location or an underlying condition
     def read_fact():
         condition_window.destroy()
         add_fact()
@@ -80,27 +111,30 @@ def add_fact():
 
     # Labels
     conditionlbl = Label(condition_window, text="Enter an underlying condition")
-    ethnicitylbl = Label(condition_window, text="Enter a risky ethnicity")
+    ethnicitylbl = Label(condition_window, text="Enter an at risk ethnicity")
+    locationlbl = Label(condition_window, text="Enter an at risk location")
 
     # Text Boxes
     conditiontb = Entry(condition_window, width=50)
     ethnicitytb = Entry(condition_window, width=50)
+    locationtb = Entry(condition_window, width=50)
+
     # Buttons
     conditionbtn = Button(condition_window, text="Add an underlying condition", command=condition)
     ethnicitybtn = Button(condition_window, text="Add an at risk ethnicity", command=ethnicity)
+    locationbtn = Button(condition_window, text="Add an at risk location", command=location)
 
     conditionbtn.grid(row=0, column=0)
     ethnicitybtn.grid(row=1, column=0)
+    locationbtn.grid(row=2, column=0)
 
 
 # This function takes the information entered by the user about the patient and stores it into the knowledge base
 def add_patient():
-    # global gender, ans
-
     # Inner Commands
     # Adds the information to Prolog
     def add_patient_to_prolog():
-        global mild, diagnosis, severe, owupoint, dpoint, opoint
+        global regular, mild, diagnosis, patient_advice, moh_advice, severe, owupoint, dpoint, opoint
 
         ppoints = 0
         pname = name.get().capitalize()
@@ -109,16 +143,17 @@ def add_patient():
         pheight2 = height2.get()
         ptemp = temp.get()
         pethnicity = selected.get().capitalize()
-        pgender = gender.get()
+        pgender = gender.get().capitalize()
         pweight = weight.get()
-        pdfb = ans.get()
+        pexperience = ans.get().capitalize()
+        plocation = location.get().capitalize()
         psys = None
         pdia = None
         passage = True
 
-        if pdfb == "yes":
+        if pexperience == "Yes":
             psys = systolic.get()
-            pdia = diastolic.get()  # The systolic and diastolic values are retrieved if they experience dizziness, fainting or blurried vision
+            pdia = diastolic.get()  # The systolic and diastolic values are retrieved if they experience dizziness, fainting or blurred vision
 
         if pname == "":
             messagebox.showwarning("NO NAME", "No name was entered.", parent=patient_window)
@@ -133,10 +168,11 @@ def add_patient():
         elif pweight == "":
             messagebox.showwarning("NO WEIGHT", "No weight (in Kg) was entered.", parent=patient_window)
         else:
-            ptemp = str(float("{0:.2f}".format((int(ptemp) * 1.8) + 32)))
-            if pdfb == "yes":
+            ptemp = str(float(
+                "{0:.2f}".format((int(ptemp) * 1.8) + 32)))  # The temperature is converted from celsius to fahrenheit
+            if pexperience == "Yes":
                 psys = systolic.get()
-                pdia = diastolic.get()  # The systolic and diastolic values are retrieved if they experience dizziness, fainting or blurried vision
+                pdia = diastolic.get()  # The systolic and diastolic values are retrieved if they experienced dizziness, fainting or blurred vision
                 if psys == "":
                     messagebox.showwarning("NO SYSTOLIC PRESSURE", "No systolic pressure was entered was entered.",
                                            parent=patient_window)
@@ -144,22 +180,23 @@ def add_patient():
                     messagebox.showwarning("NO DIASTOLIC PRESSURE", "No diastolic pressure was entered.",
                                            parent=patient_window)
                 else:
-
+                    # Inserts the patient's information into the knowledge base if they experienced dizziness, fainting or blurred vision
                     prolog.assertz(
-                        "patientw('" + pname + "', " + page + "," + pheight1 + "," + pheight2 + "," + ptemp + ",'"
-                        + pethnicity + "'," + pgender + "," + pweight + "," + pdfb + "," + psys + "," + pdia + ")")
+                        "patient_info2('" + pname + "', " + page + "," + pheight1 + "," + pheight2 + "," + ptemp + ",'"
+                        + plocation + "','" + pethnicity + "','" + pgender + "'," + pweight + ",'" + pexperience + "'," + psys + "," + pdia + ")")
 
-                    c = list(prolog.query("get_patientw('" + pname + "',B,C,D,E,F,G,H,I,J,K)"))
+                    c = list(prolog.query("get_patient_info2('" + pname + "',B,C,D,E,F,G,H,I,J,K,L)"))
                     if len(c) == 0:
                         messagebox.showerror("Error", "Patient was not added.", parent=patient_window)
                     else:
                         messagebox.showinfo("Success", "Patient was added successfully.", parent=patient_window)
             else:
+                # Inserts the patient's information into the knowledge base if they didn't experience dizziness, fainting or blurred vision
                 prolog.assertz(
-                    "patientn('" + pname + "', " + page + "," + pheight1 + "," + pheight2 + "," + ptemp + ",'"
-                    + pethnicity + "'," + pgender + "," + pweight + "," + pdfb + ")")
+                    "patient_info2('" + pname + "', " + page + "," + pheight1 + "," + pheight2 + "," + ptemp + ",'"
+                    + plocation + "','" + pethnicity + "','" + pgender + "'," + pweight + ",'" + pexperience + "')")
 
-                c = list(prolog.query("get_patientn('" + pname + "',B,C,D,E,F,G,H,I)"))
+                c = list(prolog.query("get_patient_info1('" + pname + "',B,C,D,E,F,G,H,I,J)"))
                 if len(c) == 0:
                     messagebox.showerror("Error", "Patient was not added.", parent=patient_window)
                 else:
@@ -176,15 +213,11 @@ def add_patient():
                             con]).capitalize())  # This list stores the underlying conditions the patient experienced
 
             for f in conditions:
-                prolog.assertz("punderlying('" + pname + "','" + f + "')")
-            # c = list(prolog.query("get_punderlying('" + pname + "',B)"))
-            # print("Conditions")
-            # print(c)
-            # print()
+                prolog.assertz("patient_condition('" + pname + "','" + f + "')")
 
             # The symptoms selected by the user is added to prolog along with the name of the patient who experienced them
             symptoms = []
-            underlying_conditions = []
+            # underlying_conditions = []
             lot = False
             for sym in range(len(SYMPTOMS)):
                 if svariables[sym].get() == "On":
@@ -192,42 +225,51 @@ def add_patient():
                     ppoints += int(POINTS[sym])
                     if SYMPTOMS[sym] == "Loss of Taste":
                         lot = True
-            for under in range(len(CONDITIONS)):
-                if variables[under].get() == "On":
-                    underlying_conditions.append(CONDITIONS[under])
+
+            # for under in range(len(CONDITIONS)):
+            #     if variables[under].get() == "On":
+            #         underlying_conditions.append(CONDITIONS[under])
 
             for h in symptoms:
-                prolog.assertz("psymptoms('" + pname + "','" + h + "')")
-
-            # c = list(prolog.query("get_psymptoms('" + pname + "',B)"))
-            # print("Symptoms")
-            # print(c)
-            # print()
+                prolog.assertz("patient_symptoms('" + pname + "','" + h + "')")
 
             if 0 <= ppoints < 6:
                 diagnosis = "Based on the provided information, " + pname + " likely does not have the COVID virus"
+                patient_advice = "None"
+                moh_advice = "None"
             elif 6 <= ppoints < 17:
                 mild += 1
-                if lot and len(underlying_conditions) > 0:
+                if lot and len(conditions) > 0:
                     owupoint += 1
                     diagnosis = "Based on the provided information, " + pname + " likely has the Omicron variant of the COVID virus with underlying conditions"
+                    patient_advice = "Self quarantine. Clean your hands regularly. Call ahead before visiting your doctor."
+                    moh_advice = "Do testing of the members of the household and immediate contacts of the patient and check if they have underlying conditions."
                 elif lot:
                     opoint += 1
                     diagnosis = "Based on the provided information, " + pname + " likely has the Omicron variant of the COVID virus"
+                    patient_advice = "Self quarantine. Clean your hands regularly."
+                    moh_advice = "Do testing of the members of the household and immediate contacts of the patient."
                 else:
                     diagnosis = "Based on the provided information, " + pname + " has mild symptoms of the COVID virus"
+                    patient_advice = "Clean your hands regularly. Clean your house regularly. Avoid sharing personal household items."
+                    moh_advice = "Send a reminder for them to revisit there doctor."
             elif ppoints >= 17:
                 severe += 1
                 if lot:
                     dpoint += 1
                     diagnosis = "Based on the provided information, " + pname + " likely has the Delta variant of the COVID virus"
+                    patient_advice = "Self quarantine. Call ahead before visiting your doctor."
+                    moh_advice = "Place the patient community under quarantine. Do testing of residents in the community."
                 else:
+                    regular += 1
                     diagnosis = "Based on the provided information, " + pname + " likely has the Regular Variant of the COVID virus"
+                    patient_advice = "Get tested for the virus. Stay home unless seeking medical care. Monitor your symptoms."
+                    moh_advice = "Send regular reminders to the patient."
 
-            prolog.retractall("virusstats(_,_,_,_,_)")
+            prolog.retractall("virusstats(mild(_), severe(_), regular(_), delta(_), omicron(_), omicronu(_))")
             prolog.assertz(
-                "virusstats(" + str(mild) + "," + str(severe) + "," + str(opoint) + "," + str(dpoint) + "," + str(
-                    owupoint) + ")")
+                "virusstats(mild(" + str(mild) + "),severe(" + str(severe) + "), regular(" + str(regular) + "), delta(" + str(dpoint) + "),(" + str(opoint) + "),(" + str(
+                    owupoint) + "))")
             prolog.assertz("patientstats('" + pname + "','" + diagnosis + "')")
             # c = list(prolog.query("patientstats('" + pname + "',B)"))
             # print(c)
@@ -485,7 +527,8 @@ def diagnose_patient():
             Label(subdiagnosis_frame, text="Ethnicity: " + patient_ethnicity, justify=CENTER, bg="#fff").pack(pady=10)
             Label(subdiagnosis_frame, text="Temperature: " + str(patient_temp) + "°F", justify=CENTER, bg="#fff").pack(
                 pady=10)
-            Label(subdiagnosis_frame, text="Height: " + str(patient_height) + "m", justify=CENTER, bg="#fff").pack(pady=10)
+            Label(subdiagnosis_frame, text="Height: " + str(patient_height) + "m", justify=CENTER, bg="#fff").pack(
+                pady=10)
             Label(subdiagnosis_frame, text="Weight: " + str(patient_weight) + "kg", justify=CENTER, bg="#fff").pack(
                 pady=10)
             Label(subdiagnosis_frame, text="BMI: " + str(bmi), justify=CENTER, bg="#fff").pack(pady=10)
@@ -515,7 +558,8 @@ def diagnose_patient():
                       bg="#fff").pack(pady=10)
 
             if patient_systolic < 90 or patient_diastolic < 60:
-                Label(subdiagnosis_frame, text="Patient has low blood pressure", justify=CENTER, bg="#fff").pack(pady=10)
+                Label(subdiagnosis_frame, text="Patient has low blood pressure", justify=CENTER, bg="#fff").pack(
+                    pady=10)
 
             condition_list = [c['X'] for c in list(prolog.query("punderlying('" + pat_name + "',X)"))]
 
@@ -538,7 +582,8 @@ def diagnose_patient():
             symptoms_tb.pack(pady=10)
 
             patient_diagnosis = [d['X'] for d in list(prolog.query("get_patientstats('" + pat_name + "',X)"))]
-            Label(subdiagnosis_frame, text="Diagnosis: " + patient_diagnosis[0] + ".", justify=CENTER, bg="#fff").pack(pady=10)
+            Label(subdiagnosis_frame, text="Diagnosis: " + patient_diagnosis[0] + ".", justify=CENTER, bg="#fff").pack(
+                pady=10)
 
         elif len(patient_info2) > 0:
             patient_age = patient_info2[0]['B']
