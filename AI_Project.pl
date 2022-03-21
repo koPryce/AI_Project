@@ -11,14 +11,14 @@
 :- dynamic advice/3.
 
 %Facts
-virusstats(mild(0), severe(0), regular(0), delta(0), omicron(0), omicronu(0)).
+virusstats(0,0,0,0,0,0).
 
 
-underlying_condition(['(empty)']).
+underlying_condition('(empty)').
 
-ethnicity(['(empty)']).
+ethnicity('(empty)').
 
-location(['(empty)']).
+location('(empty)').
 
 symptoms(name('Fever'), point(1)).
 symptoms(name('Cough'), point(1)).
@@ -38,17 +38,16 @@ symptoms(name('Confusion'), point(3)).
 symptoms(name('Chest Pain'), point(3)).
 
 %Rules
-get_patient_info1(A,B,C,D,E,F,G,H,I):- patient_info1(A,B,C,D,E,F,G,H,I).
-get_patient_info2(A,B,C,D,E,F,G,H,I,J,K):- patient_info2(A,B,C,D,E,F,G,H,I,J,K).
+get_patient_info1(A,B,C,D,E,F,G,H,I,J):- patient_info1(A,B,C,D,E,F,G,H,I,J).
+get_patient_info2(A,B,C,D,E,F,G,H,I,J,K,L):- patient_info2(A,B,C,D,E,F,G,H,I,J,K,L).
 get_patient_condition(A,B):- patient_condition(A,B).
 get_patient_symptoms(A,B):- patient_symptoms(A,B).
 get_patientstats(A,B,C,D):- patientstats(A,B,C,D).
 get_advice(Name, B, C):- advice((patient_name(Name),moh_advice(B),patient_advice(C))).
 
-update_condition(Cond,X):- underlying_condition(Oldlist),append(Oldlist,[Cond],Newlist), retractall(underlying_condition(_)),assert(underlying_condition(Newlist)),underlying_condition(X).
-update_ethnicity(Eth,X):- ethnicity(Oldlist),append(Oldlist,[Eth],Newlist), retractall(ethnicity(_)),assert(ethnicity(Newlist)),ethnicity(X).
-update_location(Loc,X):- location(Oldlist),append(Oldlist,[Loc],Newlist), retractall(location(_)),assert(location(Newlist)),location(X).
+get_condition(Cond):- underlying_condition(Cond).
+get_ethnicity(Eth):- ethnicity(Eth).
+get_location(Loc):- location(Loc).
 
-get_conditions(Value, List):- underlying_condition(List), member(Value, List).
-get_ethnicities(Value, List):- ethnicity(List), member(Value, List).
-get_locations(Value, List):- location(List), member(Value, List).
+
+
