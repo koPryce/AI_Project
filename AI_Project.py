@@ -121,7 +121,8 @@ def add_fact():
     condition_window.title('Add Condition Fact')
     condition_window.iconbitmap('./favicon.ico')
     condition_window.configure(bg="#353535")
-    condition_window.geometry("850x600")
+    condition_window.geometry("500x150")
+    condition_window.resizable(False, False)
 
     # Labels
     conditionlbl = Label(condition_window, text="Enter an underlying condition")
@@ -349,7 +350,8 @@ def add_patient():
     patient_window.title('Add Patient Fact')
     patient_window.iconbitmap('./favicon.ico')
     patient_window.configure(bg="#353535")
-    patient_window.geometry("850x600")
+    patient_window.resizable(False, False)
+    patient_window.geometry("1110x630")
 
     # Frame
     patient_frame = LabelFrame(patient_window, text="Condition Details", padx=40, pady=40, borderwidth=10,
@@ -794,7 +796,7 @@ main_window = Tk()
 main_window.title('MOH Expert System')
 main_window.iconbitmap('./favicon.ico')
 main_window.configure(bg="#353535")
-main_window.geometry("900x600")
+main_window.geometry("980x600")
 
 # Frames
 main_frame = LabelFrame(main_window, text="Main Window", padx=40, pady=40, borderwidth=10, bg="#fff")
