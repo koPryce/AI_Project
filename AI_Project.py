@@ -29,7 +29,7 @@ def add_fact():
         ethnicitylbl.grid(row=0, column=0)
         ethnicitytb.grid(row=0, column=1)
         esubmitbtn = Button(condition_window, text="Submit", command=sendEToDatabase)
-        esubmitbtn.grid(row=1, column=0)
+        esubmitbtn.grid(row=1, column=0, padx=5, pady=9)
         backbtn = Button(condition_window, text="Go Back", command=read_fact)
         backbtn.grid(row=1, column=1)
 
@@ -41,7 +41,7 @@ def add_fact():
         conditionlbl.grid(row=0, column=0)
         conditiontb.grid(row=0, column=1)
         csubmitbtn = Button(condition_window, text="Submit", command=sendCToDatabase)
-        csubmitbtn.grid(row=1, column=0)
+        csubmitbtn.grid(row=1, column=0, padx=5, pady=9)
         backbtn = Button(condition_window, text="Go Back", command=read_fact)
         backbtn.grid(row=1, column=1)
 
@@ -53,7 +53,7 @@ def add_fact():
         locationlbl.grid(row=0, column=0)
         locationtb.grid(row=0, column=1)
         lsubmitbtn = Button(condition_window, text="Submit", command=sendLToDatabase)
-        lsubmitbtn.grid(row=1, column=0)
+        lsubmitbtn.grid(row=1, column=0, padx=5, pady=9)
         backbtn = Button(condition_window, text="Go Back", command=read_fact)
         backbtn.grid(row=1, column=1)
 
@@ -139,9 +139,9 @@ def add_fact():
     ethnicitybtn = Button(condition_window, text="Add an at risk ethnicity", command=ethnicity)
     locationbtn = Button(condition_window, text="Add an at risk location", command=location)
 
-    conditionbtn.grid(row=0, column=0)
-    ethnicitybtn.grid(row=1, column=0)
-    locationbtn.grid(row=2, column=0)
+    conditionbtn.grid(row=0, column=0, padx=5, pady=7)
+    ethnicitybtn.grid(row=1, column=0, padx=5, pady=7)
+    locationbtn.grid(row=2, column=0, padx=5, pady=7)
 
 
 # This function takes the information entered by the user about the patient and stores it into the knowledge base
@@ -351,7 +351,7 @@ def add_patient():
     patient_window.iconbitmap('./favicon.ico')
     patient_window.configure(bg="#353535")
     patient_window.resizable(False, False)
-    patient_window.geometry("1110x630")
+    patient_window.geometry("1110x630+100+75")
 
     # Frame
     patient_frame = LabelFrame(patient_window, text="Condition Details", padx=40, pady=40, borderwidth=10,
@@ -485,7 +485,7 @@ def add_patient():
 
     # Submit Button
     submit = Button(patient_frame, text="Submit", justify=CENTER, command=add_patient_to_prolog)
-    submit.grid(row=u + 2, column=2)
+    submit.grid(row=u + 2, column=2, padx=5, pady=9)
     submit.rowconfigure(20, weight=1)
     submit.columnconfigure(2, weight=1)
 
@@ -525,7 +525,7 @@ def display_statistics():
     statistics_window.title('Display Statistics')
     statistics_window.iconbitmap('./favicon.ico')
     statistics_window.configure(bg="#353535")
-    statistics_window.geometry("850x600")
+    statistics_window.geometry("850x600+100+50")
 
     # Frame
     statistics_frame = LabelFrame(statistics_window, text="Condition Details", padx=40, pady=40, borderwidth=10,
@@ -751,7 +751,7 @@ def diagnose_patient():
     diagnosis_window.title('Patient Diagnosis')
     diagnosis_window.iconbitmap('./favicon.ico')
     diagnosis_window.configure(bg="#353535")
-    diagnosis_window.geometry("850x600")
+    diagnosis_window.geometry("850x600+100+50")
 
     # Main Frame
     diagnosis_frame = LabelFrame(diagnosis_window, text="Condition Details", padx=40, pady=40, borderwidth=10,
@@ -785,8 +785,8 @@ def diagnose_patient():
     patient_name.grid(row=0, column=1, columnspan=2)
 
     # Button
-    display = Button(subdiagnosis_frame, text="Display Patient", justify=CENTER, command=retrieve_patient)
-    display.grid(row=1, column=2)
+    display = Button(subdiagnosis_frame, text="Display Patient", justify=CENTER, command=retrieve_patient, bd=4)
+    display.grid(row=1, column=2, padx=5, pady=9)
     display.rowconfigure(20, weight=1)
     display.columnconfigure(2, weight=1)
 
@@ -796,7 +796,8 @@ main_window = Tk()
 main_window.title('MOH Expert System')
 main_window.iconbitmap('./favicon.ico')
 main_window.configure(bg="#353535")
-main_window.geometry("980x600")
+main_window.resizable(False, False)
+main_window.geometry("980x600+100+50")
 
 # Frames
 main_frame = LabelFrame(main_window, text="Main Window", padx=40, pady=40, borderwidth=10, bg="#fff")
