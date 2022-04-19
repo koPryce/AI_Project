@@ -1,6 +1,7 @@
 from tkinter import *
 from pyswip import Prolog
 from tkinter import messagebox, ttk
+from functools import partial
 
 # Used to connect to the Prolog Knowledge Base
 prolog = Prolog()
@@ -125,6 +126,10 @@ def add_fact():
     condition_window.resizable(False, False)
 
     # Labels
+    backlbl = Label(condition_window, text="<--Back to Main", padx=37, bg="#30D5C8")
+    backlbl.bind("<Enter>", partial(configureColor, backlbl, "blue"))
+    backlbl.bind("<Leave>", partial(configureColor, backlbl, "black"))
+    backlbl.bind("<Button-1>", lambda e: goBack(condition_window))
     conditionlbl = Label(condition_window, text="Enter an underlying condition")
     ethnicitylbl = Label(condition_window, text="Enter an at risk ethnicity")
     locationlbl = Label(condition_window, text="Enter an at risk location")
@@ -135,13 +140,14 @@ def add_fact():
     locationtb = Entry(condition_window, width=50)
 
     # Buttons
-    conditionbtn = Button(condition_window, text="Add an underlying condition", command=condition)
-    ethnicitybtn = Button(condition_window, text="Add an at risk ethnicity", command=ethnicity)
-    locationbtn = Button(condition_window, text="Add an at risk location", command=location)
+    conditionbtn = Button(condition_window, text="Add an underlying condition", command=condition, padx=5)
+    ethnicitybtn = Button(condition_window, text="Add an at risk ethnicity", command=ethnicity, padx=20)
+    locationbtn = Button(condition_window, text="Add an at risk location", command=location, padx=20)
 
     conditionbtn.grid(row=0, column=0, padx=5, pady=7)
     ethnicitybtn.grid(row=1, column=0, padx=5, pady=7)
     locationbtn.grid(row=2, column=0, padx=5, pady=7)
+    backlbl.grid(row=3, column=0, pady=7)
 
 
 # This function takes the information entered by the user about the patient and stores it into the knowledge base
@@ -253,7 +259,6 @@ def add_patient():
             # The underlying conditions selected by the user is added to prolog along with the name of the patient who
             # experienced them
             conditions = []
-            empty = False
             length = len(CONDITIONS)
             for con in range(length):
                 if variables[con].get() == "On":
@@ -351,7 +356,7 @@ def add_patient():
     patient_window.iconbitmap('./favicon.ico')
     patient_window.configure(bg="#353535")
     patient_window.resizable(False, False)
-    patient_window.geometry("1110x630+100+75")
+    patient_window.geometry("1110x670+100+75")
 
     # Frame
     patient_frame = LabelFrame(patient_window, text="Condition Details", padx=40, pady=40, borderwidth=10,
@@ -371,6 +376,10 @@ def add_patient():
     Label(patient_frame, text="Experienced dizziness, fainting or blurred vision?").grid(row=9, column=0)
     Label(patient_frame, text="Underlying condition").grid(row=12, column=0)
     symptom = Label(patient_frame, text="Symptoms")
+    backlbl = Label(patient_frame, text="<--Back to Main", bg="#30D5C8")
+    backlbl.bind("<Enter>", partial(configureColor, backlbl, "blue"))
+    backlbl.bind("<Leave>", partial(configureColor, backlbl, "black"))
+    backlbl.bind("<Button-1>", lambda e: goBack(patient_window))
 
     # Text Boxes
     name = Entry(patient_frame, width=30)
@@ -484,10 +493,11 @@ def add_patient():
     radio_buttons = [ansbtn1, ansbtn2]
 
     # Submit Button
-    submit = Button(patient_frame, text="Submit", justify=CENTER, command=add_patient_to_prolog)
+    submit = Button(patient_frame, text="Submit", justify=CENTER, command=add_patient_to_prolog, padx=10)
     submit.grid(row=u + 2, column=2, padx=5, pady=9)
     submit.rowconfigure(20, weight=1)
     submit.columnconfigure(2, weight=1)
+    backlbl.grid(row=u + 3, column=0)
 
 
 # This function displays the statistics of the overall diagnosed patients
@@ -543,6 +553,12 @@ def display_statistics():
           justify=CENTER, bg="#fff").pack(pady=10)
     Label(statistics_frame, text="The patients with the Omicron Variant with underlying conditions: " +
                                  str(puomicron) + "%", justify=CENTER, bg="#fff").pack(pady=10)
+
+    backlbl = Label(statistics_frame, text="<--Back to Main", bg="#30D5C8")
+    backlbl.bind("<Enter>", partial(configureColor, backlbl, "blue"))
+    backlbl.bind("<Leave>", partial(configureColor, backlbl, "black"))
+    backlbl.bind("<Button-1>", lambda e: goBack(statistics_window))
+    backlbl.pack(pady=10)
 
 
 # This function is used to display the diagnosis of a specific patient.
@@ -756,8 +772,14 @@ def diagnose_patient():
     # Main Frame
     diagnosis_frame = LabelFrame(diagnosis_window, text="Condition Details", padx=40, pady=40, borderwidth=10,
                                  bg="#fff")
-    # diagnosis_frame.grid(row=0, column=0, padx=(80, 20), pady=100)
     diagnosis_frame.pack(fill=BOTH, expand=1)
+
+    # Label
+    backlbl = Label(diagnosis_frame, text="<--Back to Main", bg="#30D5C8")
+    backlbl.bind("<Enter>", partial(configureColor, backlbl, "blue"))
+    backlbl.bind("<Leave>", partial(configureColor, backlbl, "black"))
+    backlbl.bind("<Button-1>", lambda e: goBack(diagnosis_window))
+    backlbl.pack()
 
     # Canvas
     canvas = Canvas(diagnosis_frame)
@@ -791,6 +813,16 @@ def diagnose_patient():
     display.columnconfigure(2, weight=1)
 
 
+def configureColor(widget, color, event):
+    widget.configure(foreground=color)
+
+
+def goBack(frame):
+    main_window.attributes("-topmost", True)
+    frame.destroy()
+    main_window.attributes("-topmost", False)
+
+
 # Main Window
 main_window = Tk()
 main_window.title('MOH Expert System')
@@ -810,9 +842,9 @@ info_frame.grid(row=0, column=1, padx=(20, 80), pady=100)
 Button(main_frame, text="Add Condition/Ethnicity/Location Fact", command=add_fact).grid(row=0, column=0, pady=10,
                                                                                         padx=100,
                                                                                         ipadx=26)
-Button(main_frame, text="Add Patient Fact", command=add_patient).grid(row=2, column=0, pady=10, padx=100)
-Button(main_frame, text="Diagnose Patient", command=diagnose_patient).grid(row=4, column=0, pady=10, padx=100, ipadx=33)
-Button(main_frame, text="Display Statistics", command=display_statistics).grid(row=5, column=0, pady=10, padx=100,
+Button(main_frame, text="Add Patient Fact", command=add_patient, padx=85).grid(row=2, column=0, pady=10, padx=100)
+Button(main_frame, text="Diagnose Patient", command=diagnose_patient, padx=52).grid(row=4, column=0, pady=10, padx=100, ipadx=33)
+Button(main_frame, text="Display Statistics", command=display_statistics, padx=52).grid(row=5, column=0, pady=10, padx=100,
                                                                                ipadx=33)
 
 # Labels
