@@ -8,8 +8,6 @@
 :- dynamic patient_symptoms/2.
 :- dynamic virusstats/6.
 :- dynamic patientstats/4.
-:- dynamic advice/3.
-
 %Facts
 virusstats(0,0,0,0,0,0).
 
@@ -43,8 +41,6 @@ get_patient_info2(A,B,C,D,E,F,G,H,I,J,K,L):- patient_info2(A,B,C,D,E,F,G,H,I,J,K
 get_patient_condition(A,B):- patient_condition(A,B).
 get_patient_symptoms(A,B):- patient_symptoms(A,B).
 get_patientstats(A,B,C,D):- patientstats(A,B,C,D).
-get_advice(Name, B, C):- advice((patient_name(Name),moh_advice(B),patient_advice(C))).
-
 get_condition(Cond):- underlying_condition(Cond).
 get_ethnicity(Eth):- ethnicity(Eth).
 get_location(Loc):- location(Loc).

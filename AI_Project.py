@@ -13,9 +13,6 @@ severe = 0
 owupoint = 0
 dpoint = 0
 opoint = 0
-ccount = 1
-ecount = 1
-lcount = 1
 
 
 # Commands
@@ -60,57 +57,64 @@ def add_fact():
 
     # This function sends the underlying_condition to the knowledge base
     def sendCToDatabase():
-        global ccount
         cond = conditiontb.get().capitalize()
-        if cond == "":
+        search = list(prolog.query(
+            "get_condition(X)"))
+        if any(c['X'] == cond for c in search):  # Checks if the underlying condition was already entered
+            messagebox.showinfo("Already Entered", "This underlying condition was already entered.",
+                                parent=condition_window)
+        elif cond == "":
             messagebox.showerror("Error", "Text Field is empty. Enter a condition.", parent=condition_window)
         else:
             prolog.assertz(
                 "underlying_condition('" + cond + "')")  # Adds the underlying condition entered into the knowledge base
             check = list(prolog.query(
                 "get_condition(X)"))  # Checks if the underlying condition is in the knowledge base.
-            if len(check) == ccount:
+            if not any(c['X'] == cond for c in check):
                 messagebox.showerror("Error", "Underlying condition was not added.", parent=condition_window)
             else:
                 conditiontb.delete(0, END)
                 messagebox.showinfo("Success", "Underlying condition was successfully added.", parent=condition_window)
-                ccount += 1
 
     # This function sends the ethnicity to the knowledge base
     def sendEToDatabase():
-        global ecount
         eth = ethnicitytb.get().capitalize()
-        if eth == "":
+        search = list(prolog.query(
+            "get_ethnicity(X)"))
+        if any(e['X'] == eth for e in search):  # Checks if the ethnicity was already entered
+            messagebox.showinfo("Already Entered", "This ethnicity was already entered.", parent=condition_window)
+        elif eth == "":
             messagebox.showerror("Error", "Text Field is empty. Enter an ethnicity.", parent=condition_window)
         else:
             prolog.assertz(
                 "ethnicity('" + eth + "')")  # Adds the ethnicity entered into the knowledge base
             check = list(prolog.query(
                 "get_ethnicity(X)"))  # Checks if the ethnicity is in the knowledge base.
-            if len(check) == ecount:
+            if not any(e['X'] == eth for e in check):
                 messagebox.showerror("Error", "Ethnicity was not added.", parent=condition_window)
             else:
                 ethnicitytb.delete(0, END)
                 messagebox.showinfo("Success", "Ethnicity was successfully added.", parent=condition_window)
-                ecount += 1
 
     # This function sends the location to the knowledge base
     def sendLToDatabase():
-        global lcount
         loc = locationtb.get().capitalize()
-        if loc == "":
+        search = list(prolog.query(
+                "get_location(X)"))
+        if any(l['X'] == loc for l in search):  # Checks if the location was already entered
+            messagebox.showinfo("Already Entered", "This location was already entered.", parent=condition_window)
+        elif loc == "":
             messagebox.showerror("Error", "Text Field is empty. Enter a location.", parent=condition_window)
         else:
             prolog.assertz(
                 "location('" + loc + "')")  # Adds the location entered into the knowledge base
             check = list(prolog.query(
                 "get_location(X)"))  # Checks if the location is in the knowledge base.
-            if len(check) == lcount:
+            if not any(l['X'] == loc for l in check):
                 messagebox.showerror("Error", "Location was not added.", parent=condition_window)
             else:
                 locationtb.delete(0, END)
                 messagebox.showinfo("Success", "Location was successfully added.", parent=condition_window)
-                lcount += 1
 
     # Allows the user to go back to choose whether to enter an at risk ethnicity, at risk location or an underlying condition
     def read_fact():
@@ -180,14 +184,24 @@ def add_patient():
             messagebox.showwarning("NO NAME", "No name was entered.", parent=patient_window)
         elif page == "":
             messagebox.showwarning("NO AGE", "No age was entered.", parent=patient_window)
+        elif not page.isdigit():
+            messagebox.showwarning("AGE IS NOT A NUMBER", "A number wasn't entered for the age.", parent=patient_window)
         elif ptemp == "":
             messagebox.showwarning("NO TEMPERATURE", "No temperature was entered.", parent=patient_window)
+        elif not ptemp.isdigit():
+            messagebox.showwarning("TEMPERATURE IS NOT A NUMBER", "A number wasn't entered for the temperature.", parent=patient_window)
         elif pheight1 == "":
             messagebox.showwarning("NO HEIGHT", "No height (in feet) was entered.", parent=patient_window)
+        elif not pheight1.isdigit():
+            messagebox.showwarning("HEIGHT IS NOT A NUMBER", "A number wasn't entered for the height (in feet).", parent=patient_window)
         elif pheight2 == "":
             messagebox.showwarning("NO HEIGHT", "No height (in inches) was entered.", parent=patient_window)
+        elif not pheight2.isdigit():
+            messagebox.showwarning("HEIGHT IS NOT A NUMBER", "A number wasn't entered for the height (in inches).", parent=patient_window)
         elif pweight == "":
             messagebox.showwarning("NO WEIGHT", "No weight (in Kg) was entered.", parent=patient_window)
+        elif not pweight.isdigit():
+            messagebox.showwarning("WEIGHT IS NOT A NUMBER", "A number wasn't entered for weight (in Kg).", parent=patient_window)
         elif pethnicity == "(empty)":
             messagebox.showerror("Error", "Please enter an ethnicity before proceeding.",
                                  parent=patient_window)
@@ -198,6 +212,10 @@ def add_patient():
             messagebox.showerror("Error", "Please enter an underlying condition before proceeding.",
                                  parent=patient_window)
         else:
+            if int(ptemp) >= 38:
+                ppoints += 3
+            pinfo2 = list(prolog.query("get_patient_info2('" + pname + "',B,C,D,E,F,G,H,I,J,K,L)"))
+            pinfo1 = list(prolog.query("get_patient_info1('" + pname + "',B,C,D,E,F,G,H,I,J)"))
             ptemp = str(float(
                 "{0:.2f}".format((int(ptemp) * 1.8) + 32)))  # The temperature is converted from celsius to fahrenheit
             if pexperience == "Yes":
@@ -209,6 +227,13 @@ def add_patient():
                 elif pdia == "":
                     messagebox.showwarning("NO DIASTOLIC PRESSURE", "No diastolic pressure was entered.",
                                            parent=patient_window)
+                elif not psys.isdigit():
+                    messagebox.showwarning("SYSTOLIC PRESSURE IS NOT A NUMBER", "A number wasn't entered for the systolic pressure", parent=patient_window)
+                elif not pdia.isdigit():
+                    messagebox.showwarning("DIASTOLIC PRESSURE IS NOT A NUMBER", "A number wasn't entered for the diastolic pressure", parent=patient_window)
+                elif len(pinfo2) > 0:
+                    messagebox.showinfo("Already Entered", "This patient was already entered.",
+                                        parent=patient_window)
                 else:
                     # Inserts the patient's information into the knowledge base if they experienced dizziness, fainting or blurred vision
                     prolog.assertz(
@@ -218,43 +243,23 @@ def add_patient():
                     c = list(prolog.query("get_patient_info2('" + pname + "',B,C,D,E,F,G,H,I,J,K,L)"))
                     if len(c) == 0:
                         messagebox.showerror("Error", "Patient was not added.", parent=patient_window)
-                    else:
+                    elif len(c) > 0:
                         messagebox.showinfo("Success", "Patient was added successfully.", parent=patient_window)
-                        name.delete(0, END)
-                        age.delete(0, END)
-                        temp.delete(0, END)
-                        height1.delete(0, END)
-                        height2.delete(0, END)
-                        weight.delete(0, END)
-                        for de in range(len(CONDITIONS)):
-                            names[de].deselect()
-
-                        for de in range(len(SYMPTOMS)):
-                            values[de].deselect()
-                        systolic.delete(0, END)
-                        diastolic.delete(0, END)
             else:
-                # Inserts the patient's information into the knowledge base if they didn't experience dizziness, fainting or blurred vision
-                prolog.assertz(
-                    "patient_info1('" + pname + "', " + page + "," + pheight1 + "," + pheight2 + "," + ptemp + ",'"
-                    + plocation + "','" + pethnicity + "','" + pgender + "'," + pweight + ",'" + pexperience + "')")
-
-                c = list(prolog.query("get_patient_info1('" + pname + "',B,C,D,E,F,G,H,I,J)"))
-                if len(c) == 0:
-                    messagebox.showerror("Error", "Patient was not added.", parent=patient_window)
+                if len(pinfo1) > 0:
+                    messagebox.showinfo("Already Entered", "This patient was already entered.",
+                                        parent=patient_window)
                 else:
-                    messagebox.showinfo("Success", "Patient was added successfully.", parent=patient_window)
-                    name.delete(0, END)
-                    age.delete(0, END)
-                    temp.delete(0, END)
-                    height1.delete(0, END)
-                    height2.delete(0, END)
-                    weight.delete(0, END)
-                    for de in range(len(CONDITIONS)):
-                        names[de].deselect()
+                    # Inserts the patient's information into the knowledge base if they didn't experience dizziness, fainting or blurred vision
+                    prolog.assertz(
+                        "patient_info1('" + pname + "', " + page + "," + pheight1 + "," + pheight2 + "," + ptemp + ",'"
+                        + plocation + "','" + pethnicity + "','" + pgender + "'," + pweight + ",'" + pexperience + "')")
 
-                    for de in range(len(SYMPTOMS)):
-                        values[de].deselect()
+                    c = list(prolog.query("get_patient_info1('" + pname + "',B,C,D,E,F,G,H,I,J)"))
+                    if len(c) == 0:
+                        messagebox.showerror("Error", "Patient was not added.", parent=patient_window)
+                    elif len(c) > 0:
+                        messagebox.showinfo("Success", "Patient was added successfully.", parent=patient_window)
 
             # The underlying conditions selected by the user is added to prolog along with the name of the patient who
             # experienced them
@@ -271,7 +276,6 @@ def add_patient():
 
             # The symptoms selected by the user is added to prolog along with the name of the patient who experienced them
             symptoms = []
-            # underlying_conditions = []
             lot = False
             for sym in range(len(SYMPTOMS)):
                 if svariables[sym].get() == "On":
@@ -279,13 +283,23 @@ def add_patient():
                     ppoints += int(POINTS[sym])
                     if SYMPTOMS[sym] == "Loss of Taste":
                         lot = True
-
-            # for under in range(len(CONDITIONS)):
-            #     if variables[under].get() == "On":
-            #         underlying_conditions.append(CONDITIONS[under])
-
             for h in symptoms:
                 prolog.assertz("patient_symptoms('" + pname + "','" + h + "')")
+
+            name.delete(0, END)
+            age.delete(0, END)
+            temp.delete(0, END)
+            height1.delete(0, END)
+            height2.delete(0, END)
+            weight.delete(0, END)
+            for de in range(len(CONDITIONS)):
+                names[de].deselect()
+
+            for de in range(len(SYMPTOMS)):
+                values[de].deselect()
+            if pexperience == "Yes":
+                systolic.delete(0, END)
+                diastolic.delete(0, END)
 
             if 0 <= ppoints < 6:
                 diagnosis = "Based on the provided information, " + pname + " likely does not have the COVID virus"
@@ -671,10 +685,10 @@ def diagnose_patient():
 
             Label(subdiagnosis_frame, text="Diagnosis: " + patient_diagnosis[0] + ".", justify=CENTER, bg="#fff").pack(
                 pady=10)
-            Label(subdiagnosis_frame, text="Advice to Patient: " + patientadvice[0] + ".", justify=CENTER,
+            Label(subdiagnosis_frame, text="Advice to Patient: " + patientadvice[0], justify=CENTER,
                   bg="#fff").pack(
                 pady=10)
-            Label(subdiagnosis_frame, text="Advice to MOH: " + mohadvice[0] + ".", justify=CENTER, bg="#fff").pack(
+            Label(subdiagnosis_frame, text="Advice to MOH: " + mohadvice[0], justify=CENTER, bg="#fff").pack(
                 pady=10)
 
         elif len(patient_info1) > 0:
@@ -843,9 +857,11 @@ Button(main_frame, text="Add Condition/Ethnicity/Location Fact", command=add_fac
                                                                                         padx=100,
                                                                                         ipadx=26)
 Button(main_frame, text="Add Patient Fact", command=add_patient, padx=85).grid(row=2, column=0, pady=10, padx=100)
-Button(main_frame, text="Diagnose Patient", command=diagnose_patient, padx=52).grid(row=4, column=0, pady=10, padx=100, ipadx=33)
-Button(main_frame, text="Display Statistics", command=display_statistics, padx=52).grid(row=5, column=0, pady=10, padx=100,
-                                                                               ipadx=33)
+Button(main_frame, text="Diagnose Patient", command=diagnose_patient, padx=52).grid(row=4, column=0, pady=10, padx=100,
+                                                                                    ipadx=33)
+Button(main_frame, text="Display Statistics", command=display_statistics, padx=52).grid(row=5, column=0, pady=10,
+                                                                                        padx=100,
+                                                                                        ipadx=33)
 
 # Labels
 Label(info_frame, text="This is an expert system developed to assist the Ministry of Health(MOH) in diagnosing the "
